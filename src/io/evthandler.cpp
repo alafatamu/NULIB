@@ -13,208 +13,210 @@ using namespace bitutils;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-bool unpackdata(unsigned short* dBuffer, int dBufferWords, raw_event* event, bool reading=false){
-  //unpack the data into a raw_event struct
-  unsigned short totalwords, nonTDCwords, blankword, XLMwords, timestamp1, timestamp2, timestamp3, timestamp4;
-  std::cout<<BLUE<<"------------------UNPACKING EVENT ------------------"<<RESET<<std::endl;
-  totalwords = *dBuffer++; //Header+XLM+TDC word count
-  nonTDCwords = *dBuffer++; //Non-TDC word count
-  blankword = *dBuffer++; //blank word
-  XLMwords = *dBuffer++; //XLM word count
+namespace {
+  bool unpackdata(unsigned short* dBuffer, int dBufferWords, raw_event* event, bool reading=false){
+    //unpack the data into a raw_event struct
+    unsigned short totalwords, nonTDCwords, blankword, XLMwords, timestamp1, timestamp2, timestamp3, timestamp4;
+    std::cout<<BLUE<<"------------------UNPACKING EVENT ------------------"<<RESET<<std::endl;
+    totalwords = *dBuffer++; //Header+XLM+TDC word count
+    nonTDCwords = *dBuffer++; //Non-TDC word count
+    blankword = *dBuffer++; //blank word
+    XLMwords = *dBuffer++; //XLM word count
 
-  if(reading){
-    std::cout<<"We have two header words, then a blank word, then the word count: ";
-    std::cout<<totalwords<<" "<<nonTDCwords<<" "<<blankword<<" "<<XLMwords<<std::endl;
-    std::cout<<"The header words tell us the size of the whole buffer and the size of the xlm buffer alone."<<std::endl;
-  }
-
-  int TDCwordcount = totalwords - nonTDCwords; //Amount of TDC words in the event
-  if(reading) std::cout<<"header1-header2=TDC word count = "<<TDCwordcount<<std::endl;
-  if(TDCwordcount<=2){
-    if(reading) std::cout<<RED<<"Sadly, there aren't enough TDC words to be useful..."<<RESET<<std::endl;
-    return false; //event may have been read successfully, but TDC data is unusable
-  }
-
-  const long long int factor = 65536; //factor for timestamp conversion (16-bit shift)
-  timestamp1 = *dBuffer++; //dBuffer[4]
-  timestamp2 = *dBuffer++; //dBuffer[5]
-  timestamp3 = *dBuffer++; //dBuffer[6]
-  timestamp4 = *dBuffer++; //dBuffer[7]
-  event->timestamp = timestamp1 + (timestamp2*factor) + (timestamp3*factor*factor) + (timestamp4*factor*factor*factor);
-  if(reading){
-    std::cout<<"The following four words are the timestamp (apply bitshift to each following word)... "<<std::endl;
-    std::cout<<timestamp1<<" "<<timestamp2<<" "<<timestamp3<<" "<<timestamp4<<std::endl;
-    std::cout<<"The full timestamp is: "<<event->timestamp<<std::endl;
-  }
-
-  int totalhits = XLMwords/5; //XLM has multiples of 5 words
-  if(reading) std::cout<<"The XLM will read out 5 words per hit in the event. The total number of hits is: "<<totalhits<<std::endl;
-  if(XLMwords%5 != 0 || XLMwords > 4095 || totalhits > 32 || totalhits < 1){
-    //printf("\033[31mRejection by wordcount\033[0m \n"); std::flush(std::cout);
-    if(reading) std::cout<<RED<<"Rejection by wordcount (not a multiple of 5, too many hits, or too few hits)"<<RESET<<std::endl;
-    return false;
-  }
-
-  if(reading) std::cout<<BLUE<<"Reading XLM data..."<<RESET<<std::endl;
-  if(reading) std::cout<<"The chip and channel IDs are both in one word, then A, B, C, and T integrations are the following 4 words.";
-  for(int i=0;i<totalhits;i++){
-    if(reading) std::cout<<"\nReading hit "<<i<<"... ";
-    unsigned short channelID=*dBuffer++; //dBuffer[8+(5*i)]
-    event->chip.push_back((channelID>>5) &0xff);
-    event->chan.push_back(channelID & 0x7);
     if(reading){
-      std::cout<<"First word of hit "<<i<<" is: "<<channelID<<std::endl;
-      std::cout<<"This gives chip: "<<event->chip[i]<<" and channel: "<<event->chan[i]<<std::endl;
+      std::cout<<"We have two header words, then a blank word, then the word count: ";
+      std::cout<<totalwords<<" "<<nonTDCwords<<" "<<blankword<<" "<<XLMwords<<std::endl;
+      std::cout<<"The header words tell us the size of the whole buffer and the size of the xlm buffer alone."<<std::endl;
     }
-    //integrators A=Total, B=ShorTint, C=Longint
-    event->Aint.push_back(*dBuffer++); //dBuffer[9+(5*i)];
-    event->Bint.push_back(*dBuffer++); //dBuffer[10+(5*i)];
-    event->Cint.push_back(*dBuffer++); //dBuffer[11+(5*i)];
-    event->Tint.push_back(*dBuffer++); //dBuffer[12+(5*i)];
+
+    int TDCwordcount = totalwords - nonTDCwords; //Amount of TDC words in the event
+    if(reading) std::cout<<"header1-header2=TDC word count = "<<TDCwordcount<<std::endl;
+    if(TDCwordcount<=2){
+      if(reading) std::cout<<RED<<"Sadly, there aren't enough TDC words to be useful..."<<RESET<<std::endl;
+      return false; //event may have been read successfully, but TDC data is unusable
+    }
+
+    const long long int factor = 65536; //factor for timestamp conversion (16-bit shift)
+    timestamp1 = *dBuffer++; //dBuffer[4]
+    timestamp2 = *dBuffer++; //dBuffer[5]
+    timestamp3 = *dBuffer++; //dBuffer[6]
+    timestamp4 = *dBuffer++; //dBuffer[7]
+    event->timestamp = timestamp1 + (timestamp2*factor) + (timestamp3*factor*factor) + (timestamp4*factor*factor*factor);
     if(reading){
-      std::cout<<"A, B, C, and T integrations: ";
-      std::cout<<event->Aint[i]<<" "<<event->Bint[i]<<" "<<event->Cint[i]<<" "<<event->Tint[i];
-      std::cout<<std::endl;
-
-      std::cout<<BLUE<<"XLM Complete... Reading TDC data..."<<RESET<<std::endl;
-      std::cout<<"NOTE: the TDC data comes in 32bit words, but we read it in 16bit segments.";
+      std::cout<<"The following four words are the timestamp (apply bitshift to each following word)... "<<std::endl;
+      std::cout<<timestamp1<<" "<<timestamp2<<" "<<timestamp3<<" "<<timestamp4<<std::endl;
+      std::cout<<"The full timestamp is: "<<event->timestamp<<std::endl;
     }
-  }
-    
-  //HERE THERE BE DRAGONS
-  //THIS IS FOR THE CAEN V775 TDC -> 32 BIT READOUT, NOT 16 -> SEE BELOW INFO TO UNDERSTAND THE WORKAROUND
-  unsigned short TDCword; //TDCword is 16 bits even though an actual word is 32 bits 
-  bool TDCendfound = false; //self explanatory
-  //Each ID word will hold channel info, then the following 16 bits will give the value
-  //Header: 01010 010 00000000 followed by 16 other bits we don't need
-  //Data:   01010 000 000 00000 where the first 000 indicates data and the last 5 bits are the channel
-  //        0_VUO 00000000000 where v is validity, u is underflow, o is overflow. Last 11 bits are the value
-  //END:    01010 100 00000000 where 100 indicates end of data. This is followed by 16 bits we don't need
 
-  //New TDC loop
-  int stickprevention = 0;
-  int wordsread = 0;
-  while(!TDCendfound){
-    if(wordsread>TDCwordcount)break;
-    stickprevention++;
-    if(stickprevention>100){
-      if(reading) std::cout<<RED<<"TDC read got stuck. Stopping..."<<RESET<<std::endl;
+    int totalhits = XLMwords/5; //XLM has multiples of 5 words
+    if(reading) std::cout<<"The XLM will read out 5 words per hit in the event. The total number of hits is: "<<totalhits<<std::endl;
+    if(XLMwords%5 != 0 || XLMwords > 4095 || totalhits > 32 || totalhits < 1){
+      //printf("\033[31mRejection by wordcount\033[0m \n"); std::flush(std::cout);
+      if(reading) std::cout<<RED<<"Rejection by wordcount (not a multiple of 5, too many hits, or too few hits)"<<RESET<<std::endl;
       return false;
     }
-    TDCword = *dBuffer++; //read a 16 bit word (not a full 32 bit statement)
-    if(reading) std::cout<<std::endl<<"The first 16bits of the TDC word are: "<<TDCword<<std::endl;
-    uint8_t opener = firstbyte(TDCword); //check the first byte for data info
-    if(TDCword==0){
-      if(reading) std::cout<<"Seeing as this value is 0 (useless), we'll read the following 16 bits and move on..."<<std::endl;
-      TDCword=*dBuffer++;
-      if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
-      wordsread++;
-      continue;
-    }else if(opener==82){ //be sure to read the next 16 bits for the full statement before moving on
-      if(reading) std::cout<<"The first byte of this word is 82. Shouldn't be anything of use here..."<<std::endl;
-      TDCword=*dBuffer++; //no need to record anything here as far as I'm aware
-      if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
-      wordsread++;
-    }else if(opener==80){ //be sure to read the next 16 bits for the full statement before moving on
+
+    if(reading) std::cout<<BLUE<<"Reading XLM data..."<<RESET<<std::endl;
+    if(reading) std::cout<<"The chip and channel IDs are both in one word, then A, B, C, and T integrations are the following 4 words.";
+    for(int i=0;i<totalhits;i++){
+      if(reading) std::cout<<"\nReading hit "<<i<<"... ";
+      unsigned short channelID=*dBuffer++; //dBuffer[8+(5*i)]
+      event->chip.push_back((channelID>>5) &0xff);
+      event->chan.push_back(channelID & 0x7);
       if(reading){
-        std::cout<<"The first byte of this word is 80. This means we have possible data here..."<<std::endl;
-        std::cout<<"Our channel ID should be "<<(TDCword&0x001F)<<std::endl;
+        std::cout<<"First word of hit "<<i<<" is: "<<channelID<<std::endl;
+        std::cout<<"This gives chip: "<<event->chip[i]<<" and channel: "<<event->chan[i]<<std::endl;
       }
-      event->TDCchannel.push_back((TDCword&0x001F));
-      TDCword=*dBuffer++;
+      //integrators A=Total, B=ShorTint, C=Longint
+      event->Aint.push_back(*dBuffer++); //dBuffer[9+(5*i)];
+      event->Bint.push_back(*dBuffer++); //dBuffer[10+(5*i)];
+      event->Cint.push_back(*dBuffer++); //dBuffer[11+(5*i)];
+      event->Tint.push_back(*dBuffer++); //dBuffer[12+(5*i)];
       if(reading){
-        std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
-        std::cout<<"Here, we are given the validity of the data according to the TDC itself: "<<(TDCword&0x2000)<<std::endl;
+        std::cout<<"A, B, C, and T integrations: ";
+        std::cout<<event->Aint[i]<<" "<<event->Bint[i]<<" "<<event->Cint[i]<<" "<<event->Tint[i];
+        std::cout<<std::endl;
+
+        std::cout<<BLUE<<"XLM Complete... Reading TDC data..."<<RESET<<std::endl;
+        std::cout<<"NOTE: the TDC data comes in 32bit words, but we read it in 16bit segments.";
       }
-      wordsread++;
-      if((TDCword&0x4000)==0){ //if validity is 0 (not valid), remove the last channel entry and continue
-        if(reading) std::cout<<"Seeing as the validity is 0, we'll remove the last channel entry and continue..."<<std::endl;
-        event->TDCchannel.pop_back(); //can't reach this point without filling the channel vector with SOMETHING
+    }
+      
+    //HERE THERE BE DRAGONS
+    //THIS IS FOR THE CAEN V775 TDC -> 32 BIT READOUT, NOT 16 -> SEE BELOW INFO TO UNDERSTAND THE WORKAROUND
+    unsigned short TDCword; //TDCword is 16 bits even though an actual word is 32 bits 
+    bool TDCendfound = false; //self explanatory
+    //Each ID word will hold channel info, then the following 16 bits will give the value
+    //Header: 01010 010 00000000 followed by 16 other bits we don't need
+    //Data:   01010 000 000 00000 where the first 000 indicates data and the last 5 bits are the channel
+    //        0_VUO 00000000000 where v is validity, u is underflow, o is overflow. Last 11 bits are the value
+    //END:    01010 100 00000000 where 100 indicates end of data. This is followed by 16 bits we don't need
+
+    //New TDC loop
+    int stickprevention = 0;
+    int wordsread = 0;
+    while(!TDCendfound){
+      if(wordsread>TDCwordcount)break;
+      stickprevention++;
+      if(stickprevention>100){
+        if(reading) std::cout<<RED<<"TDC read got stuck. Stopping..."<<RESET<<std::endl;
+        return false;
+      }
+      TDCword = *dBuffer++; //read a 16 bit word (not a full 32 bit statement)
+      if(reading) std::cout<<std::endl<<"The first 16bits of the TDC word are: "<<TDCword<<std::endl;
+      uint8_t opener = firstbyte(TDCword); //check the first byte for data info
+      if(TDCword==0){
+        if(reading) std::cout<<"Seeing as this value is 0 (useless), we'll read the following 16 bits and move on..."<<std::endl;
+        TDCword=*dBuffer++;
+        if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
+        wordsread++;
         continue;
+      }else if(opener==82){ //be sure to read the next 16 bits for the full statement before moving on
+        if(reading) std::cout<<"The first byte of this word is 82. Shouldn't be anything of use here..."<<std::endl;
+        TDCword=*dBuffer++; //no need to record anything here as far as I'm aware
+        if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
+        wordsread++;
+      }else if(opener==80){ //be sure to read the next 16 bits for the full statement before moving on
+        if(reading){
+          std::cout<<"The first byte of this word is 80. This means we have possible data here..."<<std::endl;
+          std::cout<<"Our channel ID should be "<<(TDCword&0x001F)<<std::endl;
+        }
+        event->TDCchannel.push_back((TDCword&0x001F));
+        TDCword=*dBuffer++;
+        if(reading){
+          std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
+          std::cout<<"Here, we are given the validity of the data according to the TDC itself: "<<(TDCword&0x2000)<<std::endl;
+        }
+        wordsread++;
+        if((TDCword&0x4000)==0){ //if validity is 0 (not valid), remove the last channel entry and continue
+          if(reading) std::cout<<"Seeing as the validity is 0, we'll remove the last channel entry and continue..."<<std::endl;
+          event->TDCchannel.pop_back(); //can't reach this point without filling the channel vector with SOMETHING
+          continue;
+        }
+        if(reading){
+          std::cout<<"Looks like this data is valid, so we'll store the data from this word..."<<std::endl;
+          std::cout<<"The value of the data may be TDCword&0x3800: "<<(TDCword&0x3800)<<std::endl;
+          std::cout<<"ChatGPT claims the value is actually TDCword&0x07FF (11-bit): ";
+          std::cout<<(TDCword&0x07FF)<<" or TDCword&0x0FFF (12-bit)"<<(TDCword&0x0FFF)<<std::endl;
+        }
+        event->TDCvalue.push_back((TDCword&0x3800));
+      }else if(opener==84){
+        if(reading) std::cout<<"The first byte of this word is 84. This means we have reached the end of the data..."<<std::endl;
+        TDCword=*dBuffer++;
+        if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
+        wordsread++;
+        TDCendfound = true;
+      }else{
+        if(reading) std::cout<<"This tells us nothing of value. Continuing..."<<std::endl;
+        wordsread++;
       }
+    }
+    if(reading) std::cout<<BLUE<<"TDC read Complete... Checking for errors..."<<RESET<<std::endl;
+
+    //Checks to flag a bad event as false
+    if(!TDCendfound){
+      event->TDCchannel.clear();
+      event->TDCvalue.clear();
+      if(reading) std::cout<<RED<<"TDC read failed. No end found..."<<RESET<<std::endl;
+      return false; //event was read successfully, but TDC data is unusable
+    }
+    if( (event->TDCchannel.size()==0)  || (event->TDCchannel.size()!=event->TDCvalue.size())){
       if(reading){
-        std::cout<<"Looks like this data is valid, so we'll store the data from this word..."<<std::endl;
-        std::cout<<"The value of the data may be TDCword&0x3800: "<<(TDCword&0x3800)<<std::endl;
-        std::cout<<"ChatGPT claims the value is actually TDCword&0x07FF (11-bit): ";
-        std::cout<<(TDCword&0x07FF)<<" or TDCword&0x0FFF (12-bit)"<<(TDCword&0x0FFF)<<std::endl;
+        std::cout<<RED;
+        std::cout<<"TDC read failed. Channel and value vectors are not the same size OR the channel vector is empty...";
+        std::cout<<RESET<<std::endl;
       }
-      event->TDCvalue.push_back((TDCword&0x3800));
-    }else if(opener==84){
-      if(reading) std::cout<<"The first byte of this word is 84. This means we have reached the end of the data..."<<std::endl;
-      TDCword=*dBuffer++;
-      if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
-      wordsread++;
-      TDCendfound = true;
-    }else{
-      if(reading) std::cout<<"This tells us nothing of value. Continuing..."<<std::endl;
-      wordsread++;
+      return false;
     }
-  }
-  if(reading) std::cout<<BLUE<<"TDC read Complete... Checking for errors..."<<RESET<<std::endl;
+    if(reading) std::cout<<GREEN<<"TDC read completed successfully..."<<RESET<<std::endl;
+    if(reading) std::cout<<"Here, we saw "<<totalhits<<" total hits and ";
+    std::cout<<event->TDCchannel.size()<<" valid TDC entries."<<std::endl;
 
-  //Checks to flag a bad event as false
-  if(!TDCendfound){
-    event->TDCchannel.clear();
-    event->TDCvalue.clear();
-    if(reading) std::cout<<RED<<"TDC read failed. No end found..."<<RESET<<std::endl;
-    return false; //event was read successfully, but TDC data is unusable
+    return true;
   }
-  if( (event->TDCchannel.size()==0)  || (event->TDCchannel.size()!=event->TDCvalue.size())){
-    if(reading){
-      std::cout<<RED;
-      std::cout<<"TDC read failed. Channel and value vectors are not the same size OR the channel vector is empty...";
-      std::cout<<RESET<<std::endl;
+
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+  bool inspectfile(std::ifstream* evtfile, int* goodcount){
+
+    unsigned short hBuffer[4]={0,0,0,0}; //prepare a header buffer
+    //hbuffer = {nbytes, nbytes2, type, type2}
+    //nbytes2 and type2 should be EMPTY (0)
+    //nbytes gives the total bytes in this event (including the header)
+    //type is assigned by the hardware. Type 30 is a physics event. 
+
+    evtfile->read((char*)hBuffer, 8); //read the header into the buffer (4 words over 8 bytes)
+    if(!(*evtfile)) return false; //if the file is empty, break
+    std::cout<<"Header: "<<hBuffer[0]<<" "<<hBuffer[1]<<" "<<hBuffer[2]<<" "<<hBuffer[3]<<std::endl;
+    int dBufferBytes = hBuffer[0]-8; //subtract the header size from the total bytes
+    int dBufferWords = dBufferBytes/2; //divide by 2 to get the number of words
+    std::cout<<"Data Buffer Bytes: "<<dBufferBytes<<std::endl;
+    std::cout<<"Data Buffer Words: "<<dBufferWords<<std::endl;
+
+    unsigned short dBuffer[4096] = {0}; //prepare a data buffer (of a safe max size)
+    evtfile->read((char*)dBuffer, dBufferBytes); //read the data into the buffer
+    //ALWAYS read the data buffer after the header, even if the header indicates bad data
+    //This way, the block of data is read entirely before looking for another header
+
+    if((hBuffer[0]>100)&&(hBuffer[2]!=2)){ //skip the event if it's overloaded
+      std::cout<<"Event overloaded. Notice nbytes>100 AND type!=2. Skipping..."<<std::endl;
+      return true; //continue the read at next entry
     }
-    return false;
-  }
-  if(reading) std::cout<<GREEN<<"TDC read completed successfully..."<<RESET<<std::endl;
-  if(reading) std::cout<<"Here, we saw "<<totalhits<<" total hits and ";
-  std::cout<<event->TDCchannel.size()<<" valid TDC entries."<<std::endl;
-
-  return true;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-bool inspectfile(std::ifstream* evtfile, int* goodcount){
-
-  unsigned short hBuffer[4]={0,0,0,0}; //prepare a header buffer
-  //hbuffer = {nbytes, nbytes2, type, type2}
-  //nbytes2 and type2 should be EMPTY (0)
-  //nbytes gives the total bytes in this event (including the header)
-  //type is assigned by the hardware. Type 30 is a physics event. 
-
-  evtfile->read((char*)hBuffer, 8); //read the header into the buffer (4 words over 8 bytes)
-  if(!(*evtfile)) return false; //if the file is empty, break
-  std::cout<<"Header: "<<hBuffer[0]<<" "<<hBuffer[1]<<" "<<hBuffer[2]<<" "<<hBuffer[3]<<std::endl;
-  int dBufferBytes = hBuffer[0]-8; //subtract the header size from the total bytes
-  int dBufferWords = dBufferBytes/2; //divide by 2 to get the number of words
-  std::cout<<"Data Buffer Bytes: "<<dBufferBytes<<std::endl;
-  std::cout<<"Data Buffer Words: "<<dBufferWords<<std::endl;
-
-  unsigned short dBuffer[4096] = {0}; //prepare a data buffer (of a safe max size)
-  evtfile->read((char*)dBuffer, dBufferBytes); //read the data into the buffer
-  //ALWAYS read the data buffer after the header, even if the header indicates bad data
-  //This way, the block of data is read entirely before looking for another header
-
-  if((hBuffer[0]>100)&&(hBuffer[2]!=2)){ //skip the event if it's overloaded
-    std::cout<<"Event overloaded. Notice nbytes>100 AND type!=2. Skipping..."<<std::endl;
-    return true; //continue the read at next entry
-  }
-  if(hBuffer[2]==30){ //if it's a physics event, unpack it
-    raw_event rawevent; //prepare a raw event struct
-    std::cout<<"Physics event denoted by type==30. Unpacking..."<<std::endl;
-    bool unpacked = false;
-    unpacked = unpackdata(dBuffer, dBufferWords, &rawevent, true);
-    if(unpacked && rawevent.chan.size()>1){
-      std::cout<<"Successful unpack AND multiple hits... This data is 'useful'."<<std::endl;
-      (*goodcount)++;
-      return true;
+    if(hBuffer[2]==30){ //if it's a physics event, unpack it
+      raw_event rawevent; //prepare a raw event struct
+      std::cout<<"Physics event denoted by type==30. Unpacking..."<<std::endl;
+      bool unpacked = false;
+      unpacked = unpackdata(dBuffer, dBufferWords, &rawevent, true);
+      if(unpacked && rawevent.chan.size()>1){
+        std::cout<<"Successful unpack AND multiple hits... This data is 'useful'."<<std::endl;
+        (*goodcount)++;
+        return true;
+      }
     }
-  }
 
-  return true;
-}
+    return true;
+  }
+};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
