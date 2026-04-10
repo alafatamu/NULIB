@@ -14,14 +14,15 @@ using namespace bitutils;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 namespace {
-  bool unpackdata(unsigned short* dBuffer, int dBufferWords, raw_event* event, bool reading=false){
+  bool unpackdata(const unsigned short* dBuffer, int dBufferWords, raw_event* event, bool reading=false){
+    const unsigned short* p = dBuffer; //preserve our dBuffer pointer starting location by working through p instead
     //unpack the data into a raw_event struct
     unsigned short totalwords, nonTDCwords, blankword, XLMwords, timestamp1, timestamp2, timestamp3, timestamp4;
     std::cout<<BLUE<<"------------------UNPACKING EVENT ------------------"<<RESET<<std::endl;
-    totalwords = *dBuffer++; //Header+XLM+TDC word count
-    nonTDCwords = *dBuffer++; //Non-TDC word count
-    blankword = *dBuffer++; //blank word
-    XLMwords = *dBuffer++; //XLM word count
+    totalwords = *p++; //Header+XLM+TDC word count
+    nonTDCwords = *p++; //Non-TDC word count
+    blankword = *p++; //blank word
+    XLMwords = *p++; //XLM word count
 
     if(reading){
       std::cout<<"We have two header words, then a blank word, then the word count: ";
@@ -37,10 +38,10 @@ namespace {
     }
 
     const long long int factor = 65536; //factor for timestamp conversion (16-bit shift)
-    timestamp1 = *dBuffer++; //dBuffer[4]
-    timestamp2 = *dBuffer++; //dBuffer[5]
-    timestamp3 = *dBuffer++; //dBuffer[6]
-    timestamp4 = *dBuffer++; //dBuffer[7]
+    timestamp1 = *p++; //dBuffer[4]
+    timestamp2 = *p++; //dBuffer[5]
+    timestamp3 = *p++; //dBuffer[6]
+    timestamp4 = *p++; //dBuffer[7]
     event->timestamp = timestamp1 + (timestamp2*factor) + (timestamp3*factor*factor) + (timestamp4*factor*factor*factor);
     if(reading){
       std::cout<<"The following four words are the timestamp (apply bitshift to each following word)... "<<std::endl;
@@ -60,7 +61,7 @@ namespace {
     if(reading) std::cout<<"The chip and channel IDs are both in one word, then A, B, C, and T integrations are the following 4 words.";
     for(int i=0;i<totalhits;i++){
       if(reading) std::cout<<"\nReading hit "<<i<<"... ";
-      unsigned short channelID=*dBuffer++; //dBuffer[8+(5*i)]
+      unsigned short channelID=*p++; //dBuffer[8+(5*i)]
       event->chip.push_back((channelID>>5) &0xff);
       event->chan.push_back(channelID & 0x7);
       if(reading){
@@ -68,10 +69,10 @@ namespace {
         std::cout<<"This gives chip: "<<event->chip[i]<<" and channel: "<<event->chan[i]<<std::endl;
       }
       //integrators A=Total, B=ShorTint, C=Longint
-      event->Aint.push_back(*dBuffer++); //dBuffer[9+(5*i)];
-      event->Bint.push_back(*dBuffer++); //dBuffer[10+(5*i)];
-      event->Cint.push_back(*dBuffer++); //dBuffer[11+(5*i)];
-      event->Tint.push_back(*dBuffer++); //dBuffer[12+(5*i)];
+      event->Aint.push_back(*p++); //dBuffer[9+(5*i)];
+      event->Bint.push_back(*p++); //dBuffer[10+(5*i)];
+      event->Cint.push_back(*p++); //dBuffer[11+(5*i)];
+      event->Tint.push_back(*p++); //dBuffer[12+(5*i)];
       if(reading){
         std::cout<<"A, B, C, and T integrations: ";
         std::cout<<event->Aint[i]<<" "<<event->Bint[i]<<" "<<event->Cint[i]<<" "<<event->Tint[i];
@@ -102,18 +103,18 @@ namespace {
         if(reading) std::cout<<RED<<"TDC read got stuck. Stopping..."<<RESET<<std::endl;
         return false;
       }
-      TDCword = *dBuffer++; //read a 16 bit word (not a full 32 bit statement)
+      TDCword = *p++; //read a 16 bit word (not a full 32 bit statement)
       if(reading) std::cout<<std::endl<<"The first 16bits of the TDC word are: "<<TDCword<<std::endl;
       uint8_t opener = firstbyte(TDCword); //check the first byte for data info
       if(TDCword==0){
         if(reading) std::cout<<"Seeing as this value is 0 (useless), we'll read the following 16 bits and move on..."<<std::endl;
-        TDCword=*dBuffer++;
+        TDCword=*p++;
         if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
         wordsread++;
         continue;
       }else if(opener==82){ //be sure to read the next 16 bits for the full statement before moving on
         if(reading) std::cout<<"The first byte of this word is 82. Shouldn't be anything of use here..."<<std::endl;
-        TDCword=*dBuffer++; //no need to record anything here as far as I'm aware
+        TDCword=*p++; //no need to record anything here as far as I'm aware
         if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
         wordsread++;
       }else if(opener==80){ //be sure to read the next 16 bits for the full statement before moving on
@@ -122,7 +123,7 @@ namespace {
           std::cout<<"Our channel ID should be "<<(TDCword&0x001F)<<std::endl;
         }
         event->TDCchannel.push_back((TDCword&0x001F));
-        TDCword=*dBuffer++;
+        TDCword=*p++;
         if(reading){
           std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
           std::cout<<"Here, we are given the validity of the data according to the TDC itself: "<<(TDCword&0x2000)<<std::endl;
@@ -142,7 +143,7 @@ namespace {
         event->TDCvalue.push_back((TDCword&0x3800));
       }else if(opener==84){
         if(reading) std::cout<<"The first byte of this word is 84. This means we have reached the end of the data..."<<std::endl;
-        TDCword=*dBuffer++;
+        TDCword=*p++;
         if(reading) std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
         wordsread++;
         TDCendfound = true;
@@ -177,7 +178,10 @@ namespace {
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-  bool inspectfile(std::ifstream* evtfile, int* goodcount){
+  bool UnpackData(std::ifstream& evtfile, int& goodcount, bool printout=false){
+    //About to try to impliment next two lines. This still works before doing that.
+    //Structure is: header, data header, xlm data, tdc data
+    //This function will read the two headers, then unpack the xlm and tdc data separately
 
     unsigned short hBuffer[4]={0,0,0,0}; //prepare a header buffer
     //hbuffer = {nbytes, nbytes2, type, type2}
@@ -185,31 +189,34 @@ namespace {
     //nbytes gives the total bytes in this event (including the header)
     //type is assigned by the hardware. Type 30 is a physics event. 
 
-    evtfile->read((char*)hBuffer, 8); //read the header into the buffer (4 words over 8 bytes)
-    if(!(*evtfile)) return false; //if the file is empty, break
-    std::cout<<"Header: "<<hBuffer[0]<<" "<<hBuffer[1]<<" "<<hBuffer[2]<<" "<<hBuffer[3]<<std::endl;
+    evtfile.read((char*)hBuffer, 8); //read the header into the buffer (4 words over 8 bytes)
+    if(!(evtfile)) return false; //if the file is empty, break
+    if(printout) std::cout<<"Header: "<<hBuffer[0]<<" "<<hBuffer[1]<<" "<<hBuffer[2]<<" "<<hBuffer[3]<<std::endl;
     int dBufferBytes = hBuffer[0]-8; //subtract the header size from the total bytes
     int dBufferWords = dBufferBytes/2; //divide by 2 to get the number of words
-    std::cout<<"Data Buffer Bytes: "<<dBufferBytes<<std::endl;
-    std::cout<<"Data Buffer Words: "<<dBufferWords<<std::endl;
+    if(printout){
+      std::cout<<"Data Buffer Bytes: "<<dBufferBytes<<std::endl;
+      std::cout<<"Data Buffer Words: "<<dBufferWords<<std::endl;
+    }
 
     unsigned short dBuffer[4096] = {0}; //prepare a data buffer (of a safe max size)
-    evtfile->read((char*)dBuffer, dBufferBytes); //read the data into the buffer
+    evtfile.read((char*)dBuffer, dBufferBytes); //read the data into the buffer
     //ALWAYS read the data buffer after the header, even if the header indicates bad data
     //This way, the block of data is read entirely before looking for another header
 
     if((hBuffer[0]>100)&&(hBuffer[2]!=2)){ //skip the event if it's overloaded
-      std::cout<<"Event overloaded. Notice nbytes>100 AND type!=2. Skipping..."<<std::endl;
+      if(printout) std::cout<<"Event overloaded. Notice nbytes>100 AND type!=2. Skipping..."<<std::endl;
       return true; //continue the read at next entry
     }
     if(hBuffer[2]==30){ //if it's a physics event, unpack it
       raw_event rawevent; //prepare a raw event struct
-      std::cout<<"Physics event denoted by type==30. Unpacking..."<<std::endl;
+      if(printout) std::cout<<"Physics event denoted by type==30. Unpacking..."<<std::endl;
+      //let's separate out the XLM and TDC data
       bool unpacked = false;
       unpacked = unpackdata(dBuffer, dBufferWords, &rawevent, true);
       if(unpacked && rawevent.chan.size()>1){
-        std::cout<<"Successful unpack AND multiple hits... This data is 'useful'."<<std::endl;
-        (*goodcount)++;
+        if(printout) std::cout<<"Successful unpack AND multiple hits... This data is 'useful'."<<std::endl;
+        (goodcount)++;
         return true;
       }
     }
@@ -220,7 +227,7 @@ namespace {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int read_evt_file(std::string filename){
+int inspect_evt_file(std::string filename){
   std::ifstream evtfile(filename);
   if(!evtfile.is_open()){
     std::cout<<RED<<"Error: could not open evt file"<<RESET<<std::endl;
@@ -241,7 +248,7 @@ int read_evt_file(std::string filename){
   while(stillreading){
     eventnumber++;
     std::cout<<GREEN<<"\nReading... Currently at event " << eventnumber << RESET<<std::endl;
-    stillreading = inspectfile(&evtfile, &goodcount);
+    stillreading = UnpackData(evtfile, goodcount);
     if(!stillreading)break;
     if(goodcount%batchsize==0&&goodcount!=lastcount){
       lastcount=goodcount;

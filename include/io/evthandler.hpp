@@ -5,4 +5,5 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int read_evt_file(std::string filename);
+int inspect_evt_file(std::string filename);
+int convert_evt_file(std::string filename);
