@@ -5,7 +5,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 namespace eventdata{
-  void display_raw(raw_event event){
+  void display_raw(const raw_event& event){
     std::cout<<"Timestamp: "<<event.timestamp<<std::endl;
     for(int i=0;i<event.chip.size();i++){
       std::cout<<"Chip: "<<event.chip[i]<<std::endl;
@@ -21,7 +21,7 @@ namespace eventdata{
     }
   }
 
-  void display_hit(processed_hit hit){
+  void display_hit(const processed_hit& hit){
     std::cout<<"Chip: "<<hit.chip<<std::endl;
     std::cout<<"Channel: "<<hit.chan<<std::endl;
     std::cout<<"Aint: "<<hit.Aint<<std::endl;
@@ -32,12 +32,17 @@ namespace eventdata{
     std::cout<<"TDCvalue: "<<hit.TDCvalue<<std::endl;
   }
 
-  void display_event(processed_event event){
+  void display_event(const processed_event& event){
     std::cout<<"Good Hits: "<<event.goodhit_amt<<std::endl;
     std::cout<<"Timestamp: "<<event.timestamp<<std::endl;
     for(int i=0;i<event.hits.size();i++){
       std::cout<<"\nHit "<<i<<":\n";
-      display_hit(event.hits[i]);
+      display_hit(event.hits[i]); //Why is this overloading?
     }
+  }
+
+  processed_event process_event(raw_event rawevent){
+    processed_event output_event;
+    return output_event;
   }
 }
