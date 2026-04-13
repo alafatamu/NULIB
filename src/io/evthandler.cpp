@@ -241,14 +241,6 @@ namespace {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-raw_event grab_event(std::ifstream& evtfile){
-  //Read the next raw event from the file
-  raw_event rawevent = UnpackData(evtfile);
-  return rawevent;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 int inspect_evt_file(std::ifstream& evtfile){
   //Read the file per event
   bool stillreading = true;
@@ -287,28 +279,10 @@ int inspect_evt_file(std::ifstream& evtfile){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int convert_evt_file(std::ifstream& evtfile){
-  //Read the file per event
-  bool stillreading = true;
-  int eventnumber = 0;
-
-  while(stillreading){
-    eventnumber++;
-
-    std::cout<<"                                                              \r";
-    std::cout<<YELLOW<<"Reading... Currently at event " << eventnumber << RESET;
-    std::flush(std::cout);
-
-    raw_event rawevent = UnpackData(evtfile); //unpack the data and read the event unpack flag
-    if(rawevent.unpackflag==2||rawevent.unpackflag==3) stillreading = false;
-
-    if(!stillreading)break;
-  }
-  std::cout<<std::endl;
-  evtfile.close();
-  std::cout<<"Done!"<<std::endl;
-
-  return 1; //successful process
+raw_event grab_event(std::ifstream& evtfile){
+  //Read the next raw event from the file
+  raw_event rawevent = UnpackData(evtfile);
+  return rawevent;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

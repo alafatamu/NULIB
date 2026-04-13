@@ -13,18 +13,30 @@ using namespace tformat;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int Evt_to_ROOT(std::string inputfilename, std::string outputfilename){
-  std::cout<<"Looking for "<<inputfilename<<std::endl;
-  std::ifstream evtfile(inputfilename);
-  if(!evtfile.is_open()){
-    std::cout<<RED<<"Error: could not open evt file"<<RESET<<std::endl;
-    return 0; //process failed somewhere
-  }else std::cout<<GREEN<<"Found!"<<RESET<<std::endl;
+namespace rooty{
+  int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename){
+    //make evthandler spit out events -- CURRENT WORK
+    bool stillreading = true;
+    int eventnumber = 0;
+    int goodcount = 0;
 
-  //make evthandler spit out events -- CURRENT WORK
-  //need the evt file to be opened outside of the evthandler (new function for global evt use?)
-  //need unpacker to return raw events (with a quality flag)
-  //then we can save the raw event data based on their quality (worthy or not)
+    while(stillreading){
+      eventnumber++;
+      std::cout<<"                                                              \r";
+      std::cout<<YELLOW<<"Reading... Currently at event " << eventnumber << RESET;
+      std::flush(std::cout);
+      raw_event rawevent = grab_event(InputEvtFile);
+      if(rawevent.unpackflag==1){ goodcount++; 
+      }else if(rawevent.unpackflag==2||rawevent.unpackflag==3) stillreading = false;
+      if(!stillreading)break;
+    }
+    //need the evt file to be opened outside of the evthandler (new function for global evt use?)
+    //need unpacker to return raw events (with a quality flag)
+    //then we can save the raw event data based on their quality (worthy or not)
 
-  return 1; //successful conversion and storage!
+    std::cout<<std::endl;
+    std::cout<<"Done!"<<std::endl;
+
+    return 1; //successful conversion and storage!
+  }
 }

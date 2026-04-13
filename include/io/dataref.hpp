@@ -7,7 +7,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 namespace namebuilder{
-  std::string get_InputEvtName(const Config& cfg, int runid, std::string modifier = "");
-  std::string get_InputRootName(const Config& cfg, int runid, std::string modifier = "");
-  std::string get_OutputRootName(const Config& cfg, int runid, std::string modifier = "");
+  std::string get_InputEvtName(const Config&, int);
+  std::string get_InputROOTName(const Config&, int, std::string modifier = "");
+  std::string get_OutputROOTName(const Config&, int, std::string modifier = "");
 };

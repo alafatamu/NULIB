@@ -18,6 +18,7 @@ int main(){
     std::cout<<"Successful read!"<<std::endl;
   }else{
     std::cout<<"Incomplete read..."<<std::endl;
-  }  
+  } 
+  evtfile.close();
   return 0;
 }
