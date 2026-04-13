@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(core
-    src/events/eventutils.cpp
+    src/analysis/eventutils.cpp
     src/io/evthandler.cpp
     src/io/dataref.cpp
     src/proggy/bitutils.cpp

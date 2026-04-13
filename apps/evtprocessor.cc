@@ -10,8 +10,12 @@ int main(){
   Config cfg = load_config("../info/config.cfg"); //read in the config from the given path
   std::cout<<"Run to convert (0 to exit): "<<std::endl; std::cin>>runreq;
   if(runreq==0) return 0; //exit code
+
   std::string InputEvtName = namebuilder::get_InputEvtName(cfg, runreq); //generate an input file name
-  int result = convert_evt_file(InputEvtName); //generate an input file name, then read that file
+  std::ifstream InputEvtFile = grabfile(InputEvtName); //open the input file
+  if(!InputEvtFile) return 0; //no file loaded
+  
+  int result = convert_evt_file(InputEvtFile); //read through the file
   if(result==0){
     std::cout<<RED<<"Run "<<runreq<<" read failed."<<RESET<<std::endl;
   }else if(result==1){

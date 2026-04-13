@@ -1,4 +1,4 @@
-#include "events/eventutils.hpp"
+#include "analysis/eventutils.hpp"
 
 #include <iostream>
 
@@ -19,6 +19,7 @@ namespace eventdata{
       std::cout<<"TDCchannel: "<<event.TDCchan[i]<<std::endl;
       std::cout<<"TDCvalue: "<<event.TDCval[i]<<std::endl;
     }
+    std::cout<<"Flag: "<<event.unpackflag<<std::endl;
   }
 
   void display_event(const processed_event& event){

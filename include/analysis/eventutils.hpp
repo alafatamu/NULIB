@@ -7,7 +7,6 @@
 namespace eventdata{
   //Useful Structs for passing data around
   struct raw_event{
-    bool worthy;
     long long int timestamp;
     std::vector<int> chip;
     std::vector<int> chan;
@@ -17,6 +16,7 @@ namespace eventdata{
     std::vector<int> Tint;
     std::vector<int> TDCchan;
     std::vector<int> TDCval;
+    int unpackflag; //used by the unpacker to determine unpacking status
   };
 
   struct processed_event{

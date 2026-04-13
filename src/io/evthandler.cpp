@@ -1,6 +1,6 @@
 #include "proggy/tformat.hpp"
 #include "io/evthandler.hpp"
-#include "events/eventutils.hpp"
+#include "analysis/eventutils.hpp"
 #include "proggy/bitutils.hpp"
 
 #include <fstream>
@@ -140,13 +140,13 @@ namespace {
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-  int UnpackData(std::ifstream& evtfile, bool printout=false){ //0=bad data, 1=good data, 2=fail, 3=done
+  raw_event UnpackData(std::ifstream& evtfile, bool printout=false){ //0=bad data, 1=good data, 2=fail, 3=done
     //Structure is: header, data header, xlm data, tdc data
     //This function will read the two headers, then unpack the xlm and tdc data separately
+
     raw_event rawevent; //prepare a raw event struct
-    rawevent.worthy = false; //initialize the quality flag
     //we'll output a raw event regardless of unpack status
-    //flag the object as needed
+    //the raw event has an unpack status flag
 
     unsigned short hBuffer[4]={0}; //prepare a header buffer
     //hbuffer = {nbytes, nbytes2, type, type2}
@@ -155,7 +155,10 @@ namespace {
     //type is assigned by the hardware. Type 30 is a physics event. 
 
     evtfile.read((char*)hBuffer, 8); //read the header into the buffer (4 words over 8 bytes)
-    if(!evtfile) return 3; //if the file is empty after this read, break
+    if(!evtfile){
+      rawevent.unpackflag = 3; //if the file is empty after this read, break
+      return rawevent;
+    }
     if(printout) std::cout<<"Header: "<<hBuffer[0]<<" "<<hBuffer[1]<<" "<<hBuffer[2]<<" "<<hBuffer[3]<<std::endl;
     int dBufferBytes = hBuffer[0]-8; //subtract the header size from the total bytes
     int dBufferWords = dBufferBytes/2; //divide by 2 to get the number of words
@@ -164,11 +167,14 @@ namespace {
     unsigned short dBuffer[4096] = {0}; //prepare a data header buffer
     //The data buffer has different format depending on the event type, so we must read the full block at once
     evtfile.read((char*)dBuffer, dBufferBytes);
-    if(!evtfile) return 3; //if the file is empty after this read, break
-
+    if(!evtfile){
+      rawevent.unpackflag = 3; //if the file is empty after this read, break
+      return rawevent;
+    }
     if((hBuffer[0]>100)&&(hBuffer[2]!=2)){//skip the event if it's overloaded
       if(printout) std::cout<<"Event overloaded. Notice nbytes>100 AND type!=2. Skipping..."<<std::endl;
-      return 0; //continue the read at next entry
+      rawevent.unpackflag = 0; //continue the read at next entry
+      return rawevent;
     }
 
     if(int(hBuffer[2])==30){ //if it's a physics event, unpack it
@@ -201,14 +207,16 @@ namespace {
 
       if(TDCwordcount<=2){ //Let's check to see if the TDC data is usable at all
         if(printout) std::cout<<RED<<"Sadly, there aren't enough TDC words to be useful..."<<RESET<<std::endl;
-        return 0; //continue the read at next entry
+        rawevent.unpackflag = 0; //continue the read at next entry
+        return rawevent;
       }
 
       int totalhits = XLMwordcount/5; //XLM has multiples of 5 words
       if(printout) std::cout<<"The XLM will read out 5 words per hit in the event. The total number of hits is: "<<totalhits<<std::endl;
       if(XLMwordcount%5 != 0 || XLMwordcount > 4095 || totalhits > 32 || totalhits < 1){
         if(printout) std::cout<<RED<<"-> Rejection by wordcount (not a multiple of 5, too many hits, or too few hits)"<<RESET<<std::endl;
-        return 0; //unsucessful unpack - let's move on :(
+        rawevent.unpackflag = 0; //unsucessful unpack - let's move on :(
+        return rawevent;
       }
 
       //okay, NOW we can unpack the full event data
@@ -222,12 +230,22 @@ namespace {
       
       if(GoodUnpack && rawevent.chan.size()>1){
         if(printout) std::cout<<YELLOW<<"Successful unpack AND multiple hits... This data is 'useful'."<<RESET<<std::endl;
-        return 1;
+        rawevent.unpackflag = 1;
+        return rawevent;
       }
     } 
-    return 0; //if it's not overloaded, nor physics event, just move on
+    rawevent.unpackflag = 0; //if it's not overloaded, nor physics event, just move on
+    return rawevent;
   }
 };
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+raw_event grab_event(std::ifstream& evtfile){
+  //Read the next raw event from the file
+  raw_event rawevent = UnpackData(evtfile);
+  return rawevent;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -247,9 +265,9 @@ int inspect_evt_file(std::ifstream& evtfile){
     eventnumber++;
     std::cout<<GREEN<<"\nReading... Currently at event " << eventnumber << RESET<<std::endl;
 
-    int UD_result = UnpackData(evtfile, true); //unpack the data and get a result value
-    if(UD_result==1){ goodcount++; 
-    }else if(UD_result==2||UD_result==3) stillreading = false;
+    raw_event rawevent = UnpackData(evtfile, true); //unpack the data and read the event unpack flag
+    if(rawevent.unpackflag==1){ goodcount++; 
+    }else if(rawevent.unpackflag==2||rawevent.unpackflag==3) stillreading = false;
 
     if(!stillreading)break;
     if(batchsize==0){ //always pause if the batch size is 0. Otherwise pause in batches 
@@ -281,8 +299,8 @@ int convert_evt_file(std::ifstream& evtfile){
     std::cout<<YELLOW<<"Reading... Currently at event " << eventnumber << RESET;
     std::flush(std::cout);
 
-    int UD_result = UnpackData(evtfile, false); //unpack the data and get a result value
-    if(UD_result==2||UD_result==3) stillreading = false;
+    raw_event rawevent = UnpackData(evtfile); //unpack the data and read the event unpack flag
+    if(rawevent.unpackflag==2||rawevent.unpackflag==3) stillreading = false;
 
     if(!stillreading)break;
   }
