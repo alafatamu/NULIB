@@ -7,6 +7,7 @@
 namespace eventdata{
   //Useful Structs for passing data around
   struct raw_event{
+    bool worthy;
     long long int timestamp;
     std::vector<int> chip;
     std::vector<int> chan;
@@ -14,30 +15,25 @@ namespace eventdata{
     std::vector<int> Bint;
     std::vector<int> Cint;
     std::vector<int> Tint;
-    std::vector<int> TDCchannel;
-    std::vector<int> TDCvalue;
-  };
-
-  struct processed_hit{
-    int chip;
-    int chan;
-    int Aint;
-    int Bint;
-    int Cint;
-    int Tint;
-    int TDCchannel;
-    int TDCvalue;
+    std::vector<int> TDCchan;
+    std::vector<int> TDCval;
   };
 
   struct processed_event{
-    int goodhit_amt;
     long long int timestamp;
-    std::vector<processed_hit> hits;
+    int hitcount;
+    std::vector<int> chip;
+    std::vector<int> chan;
+    std::vector<int> Aint;
+    std::vector<int> Bint;
+    std::vector<int> Cint;
+    std::vector<int> Tint;
+    std::vector<int> TDCchan;
+    std::vector<int> TDCval;
   };
 
   //Functions for handling the event data (and structs)
   void display_raw(raw_event);
-  void display_hit(processed_hit);
   void display_event(processed_event);
   processed_event process_raw_event(raw_event);
 }

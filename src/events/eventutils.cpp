@@ -15,29 +15,25 @@ namespace eventdata{
       std::cout<<"Cint: "<<event.Cint[i]<<std::endl;
       std::cout<<"Tint: "<<event.Tint[i]<<std::endl;
     }
-    for(int i=0;i<event.TDCchannel.size();i++){
-      std::cout<<"TDCchannel: "<<event.TDCchannel[i]<<std::endl;
-      std::cout<<"TDCvalue: "<<event.TDCvalue[i]<<std::endl;
+    for(int i=0;i<event.TDCchan.size();i++){
+      std::cout<<"TDCchannel: "<<event.TDCchan[i]<<std::endl;
+      std::cout<<"TDCvalue: "<<event.TDCval[i]<<std::endl;
     }
   }
 
-  void display_hit(const processed_hit& hit){
-    std::cout<<"Chip: "<<hit.chip<<std::endl;
-    std::cout<<"Channel: "<<hit.chan<<std::endl;
-    std::cout<<"Aint: "<<hit.Aint<<std::endl;
-    std::cout<<"Bint: "<<hit.Bint<<std::endl;
-    std::cout<<"Cint: "<<hit.Cint<<std::endl;
-    std::cout<<"Tint: "<<hit.Tint<<std::endl;
-    std::cout<<"TDCchannel: "<<hit.TDCchannel<<std::endl;
-    std::cout<<"TDCvalue: "<<hit.TDCvalue<<std::endl;
-  }
-
   void display_event(const processed_event& event){
-    std::cout<<"Good Hits: "<<event.goodhit_amt<<std::endl;
+    std::cout<<"Good Hits: "<<event.hitcount<<std::endl;
     std::cout<<"Timestamp: "<<event.timestamp<<std::endl;
-    for(int i=0;i<event.hits.size();i++){
-      std::cout<<"\nHit "<<i<<":\n";
-      display_hit(event.hits[i]); //Why is this overloading?
+    for(int i=0;i<event.hitcount;i++){
+      std::cout<<"Hit "<<i<<": "<<std::endl;
+      std::cout<<"Chip: "<<event.chip[i]<<std::endl;
+      std::cout<<"Channel: "<<event.chan[i]<<std::endl;
+      std::cout<<"Aint: "<<event.Aint[i]<<std::endl;
+      std::cout<<"Bint: "<<event.Bint[i]<<std::endl;
+      std::cout<<"Cint: "<<event.Cint[i]<<std::endl;
+      std::cout<<"Tint: "<<event.Tint[i]<<std::endl;
+      std::cout<<"TDCchannel: "<<event.TDCchan[i]<<std::endl;
+      std::cout<<"TDCvalue: "<<event.TDCval[i]<<std::endl;
     }
   }
 

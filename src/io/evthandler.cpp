@@ -86,7 +86,7 @@ namespace {
           std::cout<<"The first byte of this word is 80. This means we have possible data here..."<<std::endl;
           std::cout<<"Our channel ID should be "<<(TDCword&0x001F)<<std::endl;
         }
-        event.TDCchannel.push_back((TDCword&0x001F));
+        event.TDCchan.push_back((TDCword&0x001F));
         TDCword=*p++;
         if(printout){
           std::cout<<"The following 16bits of the TDC word are: "<<TDCword<<std::endl;
@@ -95,7 +95,7 @@ namespace {
         wordsread++;
         if((TDCword&0x4000)==0){ //if validity is 0 (not valid), remove the last channel entry and continue
           if(printout) std::cout<<"Seeing as the validity is 0, we'll remove the last channel entry and continue..."<<std::endl;
-          event.TDCchannel.pop_back(); //can't reach this point without filling the channel vector with SOMETHING
+          event.TDCchan.pop_back(); //can't reach this point without filling the channel vector with SOMETHING
           continue;
         }
         if(printout){
@@ -104,7 +104,7 @@ namespace {
           std::cout<<"ChatGPT claims the value is actually TDCword&0x07FF (11-bit): ";
           std::cout<<(TDCword&0x07FF)<<" or TDCword&0x0FFF (12-bit)"<<(TDCword&0x0FFF)<<std::endl;
         }
-        event.TDCvalue.push_back((TDCword&0x3800));
+        event.TDCval.push_back((TDCword&0x3800));
       }else if(opener==84){
         if(printout) std::cout<<"The first byte of this word is 84. This means we have reached the end of the data..."<<std::endl;
         TDCword=*p++;
@@ -120,12 +120,12 @@ namespace {
 
     //Checks to flag a bad event as false
     if(!TDCendfound){
-      event.TDCchannel.clear();
-      event.TDCvalue.clear();
+      event.TDCchan.clear();
+      event.TDCval.clear();
       if(printout) std::cout<<RED<<"TDC read failed. No end found..."<<RESET<<std::endl;
        return 0; //unsuccessful unpack :(
     }
-    if( (event.TDCchannel.size()==0)  || (event.TDCchannel.size()!=event.TDCvalue.size())){
+    if( (event.TDCchan.size()==0)  || (event.TDCchan.size()!=event.TDCval.size())){
       if(printout){
         std::cout<<RED;
         std::cout<<"TDC read failed. Channel and value vectors are not the same size OR the channel vector is empty...";
@@ -140,9 +140,13 @@ namespace {
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-  int UnpackData(std::ifstream* evtfile, bool printout=false){ //0=bad data, 1=good data, 2=fail, 3=done
+  int UnpackData(std::ifstream& evtfile, bool printout=false){ //0=bad data, 1=good data, 2=fail, 3=done
     //Structure is: header, data header, xlm data, tdc data
     //This function will read the two headers, then unpack the xlm and tdc data separately
+    raw_event rawevent; //prepare a raw event struct
+    rawevent.worthy = false; //initialize the quality flag
+    //we'll output a raw event regardless of unpack status
+    //flag the object as needed
 
     unsigned short hBuffer[4]={0}; //prepare a header buffer
     //hbuffer = {nbytes, nbytes2, type, type2}
@@ -150,8 +154,8 @@ namespace {
     //nbytes gives the total bytes in this event (including the header)
     //type is assigned by the hardware. Type 30 is a physics event. 
 
-    evtfile->read((char*)hBuffer, 8); //read the header into the buffer (4 words over 8 bytes)
-    if(!(*evtfile)) return 3; //if the file is empty after this read, break
+    evtfile.read((char*)hBuffer, 8); //read the header into the buffer (4 words over 8 bytes)
+    if(!evtfile) return 3; //if the file is empty after this read, break
     if(printout) std::cout<<"Header: "<<hBuffer[0]<<" "<<hBuffer[1]<<" "<<hBuffer[2]<<" "<<hBuffer[3]<<std::endl;
     int dBufferBytes = hBuffer[0]-8; //subtract the header size from the total bytes
     int dBufferWords = dBufferBytes/2; //divide by 2 to get the number of words
@@ -159,8 +163,8 @@ namespace {
 
     unsigned short dBuffer[4096] = {0}; //prepare a data header buffer
     //The data buffer has different format depending on the event type, so we must read the full block at once
-    evtfile->read((char*)dBuffer, dBufferBytes);
-    if(!(*evtfile)) return 3; //if the file is empty after this read, break
+    evtfile.read((char*)dBuffer, dBufferBytes);
+    if(!evtfile) return 3; //if the file is empty after this read, break
 
     if((hBuffer[0]>100)&&(hBuffer[2]!=2)){//skip the event if it's overloaded
       if(printout) std::cout<<"Event overloaded. Notice nbytes>100 AND type!=2. Skipping..."<<std::endl;
@@ -169,7 +173,6 @@ namespace {
 
     if(int(hBuffer[2])==30){ //if it's a physics event, unpack it
 
-      raw_event rawevent; //prepare a raw event struct
       if(printout) std::cout<<"Physics event denoted by type==30. Unpacking..."<<std::endl;
       //The data header for a physics event is 8 words long
       //->{(dH+XLM+TDC) words, (dH+XLM) words, blank, XLM words, timestamp1, timestamp2, timestamp3, timestamp4}
@@ -228,13 +231,7 @@ namespace {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int inspect_evt_file(std::string filename){
-  std::ifstream evtfile(filename);
-  if(!evtfile.is_open()){
-    std::cout<<RED<<"Error: could not open evt file"<<RESET<<std::endl;
-    return 0; //process failed somewhere
-  }
-
+int inspect_evt_file(std::ifstream& evtfile){
   //Read the file per event
   bool stillreading = true;
   int eventnumber = 0;
@@ -250,7 +247,7 @@ int inspect_evt_file(std::string filename){
     eventnumber++;
     std::cout<<GREEN<<"\nReading... Currently at event " << eventnumber << RESET<<std::endl;
 
-    int UD_result = UnpackData(&evtfile, true); //unpack the data and get a result value
+    int UD_result = UnpackData(evtfile, true); //unpack the data and get a result value
     if(UD_result==1){ goodcount++; 
     }else if(UD_result==2||UD_result==3) stillreading = false;
 
@@ -272,14 +269,7 @@ int inspect_evt_file(std::string filename){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int convert_evt_file(std::string filename){
-  std::cout<<"Looking for "<<filename<<std::endl;
-  std::ifstream evtfile(filename);
-  if(!evtfile.is_open()){
-    std::cout<<RED<<"Error: could not open evt file"<<RESET<<std::endl;
-    return 0; //process failed somewhere
-  }else std::cout<<GREEN<<"Found!"<<RESET<<std::endl;
-
+int convert_evt_file(std::ifstream& evtfile){
   //Read the file per event
   bool stillreading = true;
   int eventnumber = 0;
@@ -291,7 +281,7 @@ int convert_evt_file(std::string filename){
     std::cout<<YELLOW<<"Reading... Currently at event " << eventnumber << RESET;
     std::flush(std::cout);
 
-    int UD_result = UnpackData(&evtfile, false); //unpack the data and get a result value
+    int UD_result = UnpackData(evtfile, false); //unpack the data and get a result value
     if(UD_result==2||UD_result==3) stillreading = false;
 
     if(!stillreading)break;
@@ -301,4 +291,16 @@ int convert_evt_file(std::string filename){
   std::cout<<"Done!"<<std::endl;
 
   return 1; //successful process
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+std::ifstream grabfile(std::string filename){
+  std::cout<<"Looking for "<<filename<<std::endl;
+  std::ifstream evtfile(filename);
+  if(!evtfile.is_open()){
+    std::cout<<RED<<"Error: could not open evt file"<<RESET<<std::endl;
+    return evtfile; //Be sure to check for the evt in the parent function
+  }else std::cout<<GREEN<<"Found!"<<RESET<<std::endl;
+  return evtfile;
 }
