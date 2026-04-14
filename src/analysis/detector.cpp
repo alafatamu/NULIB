@@ -1,0 +1,137 @@
+//load detector/experiment mapping into detector object
+
+#include "analysis/detector.hpp"
+#include "proggy/tformat.hpp"
+#include "proggy/config.hpp"
+
+#include <fstream>
+#include <iostream>
+#include <string>
+
+using namespace tformat;
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// GETTER FUNCTIONS
+int detector::getbar(int chip, int chan) { return map_bar[chip][chan]; }
+int detector::get_pmt_id(int chip, int chan) { return map_chan[chip][chan]; }
+double detector::get_gainfactors(int bar, int spot){ return map_gainfactors[bar][spot]; } //spot is top (0) or bottom (1) 
+int detector::get_tdcchan(int chip, int chan){ return map_tdcchan[chip][chan]; }
+int detector::get_top_pmt_id(int bar){ return map_toppmts[bar]; }
+int detector::get_bottom_pmt_id(int bar) { return map_bottompmts[bar]; }
+
+double detector::get_coord(int chip, int chan, int coordreq) { // 0 is x, 1 is y
+	if(coordreq==0) return (double)map_x[chip][chan];
+	if(coordreq==1) return (double)map_y[chip][chan];
+	return {0}; // TODO: default behavior here should be a useless value like NAN, or to throw an error
+}
+
+double detector::get_offset(int chip, int chan, int osreq) { // osreq = offset request, 0 is A and 1 is B
+	double offsets[2];
+	offsets[0] = map_Aoffset[chip][chan];
+	offsets[1] = map_Boffset[chip][chan];
+	return offsets[osreq];
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// MAP READERS
+
+void detector::ReadMap(std::string barmapfile){
+  //////////////////////////Read PMT channel map///////////////////////////////
+  // This map had chip+channel information from the PSD chips. It
+  // also gives the offsets for A-gate and B-gate integrations
+  // from the PSD chips
+  /////////////////////////////////////////////////////////////////////////////
+  std::ifstream inmap(barmapfile);
+  if(inmap.fail()) throw std::invalid_argument(std::string(BOLDRED) + std::string("Bar map file ") + barmapfile + std::string(" does not exist or failed to open") + std::string(RESET));
+  else std::cout<<GREEN<<"Bar mapping file "<<barmapfile<<" opened\n"<<RESET;
+
+  int inchip,inchipchan,outchan,outtdcchan,outx,outy,outbarnum; //read chip and channel and output bar position and ID
+  double outAoffset,outBoffset,tdcoffset;
+
+  while (inmap.good()){
+    inmap>>inchip>>inchipchan>>outchan>>outtdcchan>>outx
+         >>outy>>outbarnum>>outAoffset>>outBoffset;
+    map_x[inchip][inchipchan]=outx; 
+    map_y[inchip][inchipchan]=outy;
+    map_bar[inchip][inchipchan]=outbarnum;
+    map_chan[inchip][inchipchan]=outchan;
+    map_tdcchan[inchip][inchipchan]=outtdcchan;
+    map_Aoffset[inchip][inchipchan]=outAoffset;
+    map_Boffset[inchip][inchipchan]=outBoffset;
+  }
+  return;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void detector::ReadPositionMap(std::string posmapfile){
+  /////////////////////////Read PMT channel map////////////////////////////////
+  // This map gives the X,Y,Z position for each crystal. It also gives the TDC
+  // offset for the top and bottom PMTs measured for each crystal. The
+  // coordinate system is the typical one used for TexAT, which IS NOT the
+  // standard beam physics experiment coordinate system. Z is up/down.
+  /////////////////////////////////////////////////////////////////////////////
+  std::ifstream inposmap(posmapfile);
+  if(inposmap.fail()) throw std::invalid_argument(std::string(BOLDRED) + std::string("Bar pos map file ") + posmapfile + std::string(" does not exist or failed to open") + std::string(RESET));
+  else std::cout<<GREEN<<"BAR position mapping file "<<posmapfile<<" opened\n"<<RESET;
+
+  int inbar,incrystal; //read chip and channel and output bar position and ID
+  double outx,outy,outz,crystal_top_tdc_offset,crystal_bot_tdc_offset,
+                      crystal_top_psdT_slope,crystal_top_psdT_offset,
+                      crystal_bot_psdT_slope,crystal_bot_psdT_offset,
+                      crystal_top_psdTgamma_offset,crystal_bot_psdTgamma_offset;
+
+  while (inposmap.good()){
+    inposmap>>inbar>>incrystal>>crystalhitID>>outx>>outy>>outz
+            >>crystal_top_tdc_offset>>crystal_bot_tdc_offset
+            >>crystal_top_psdT_slope>>crystal_top_psdT_offset
+            >>crystal_bot_psdT_slope>>crystal_bot_psdT_offset
+            >>crystal_top_psdTgamma_offset>>crystal_bot_psdTgamma_offset;
+    map_crystalhitID[inbar][incrystal]=crystalhitID;
+    map_crystalx[inbar][incrystal]=outx;
+    map_crystaly[inbar][incrystal]=outy;
+    map_crystalz[inbar][incrystal]=outz;
+    map_crystaltoptdcoffset[inbar][incrystal]=crystal_top_tdc_offset;
+    map_crystalbottomtdcoffset[inbar][incrystal]=crystal_bot_tdc_offset;
+    map_crystaltoppsdTslope[inbar][incrystal]=crystal_top_psdT_slope;
+    map_crystaltoppsdToffset[inbar][incrystal]=crystal_top_psdT_offset;
+    map_crystalbottompsdTslope[inbar][incrystal]=crystal_bot_psdT_slope;
+    map_crystalbottompsdToffset[inbar][incrystal]=crystal_bot_psdT_offset;
+    map_crystaltoppsdTgammaoffset[inbar][incrystal]=crystal_top_psdTgamma_offset;
+    map_crystalbottompsdTgammaoffset[inbar][incrystal]=crystal_bot_psdTgamma_offset;
+  }
+  return;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void detector::ReadGains(std::string gainfile){
+  //Read the pmt gain map
+  //These should be relative pmt gains -> that's the only way that makes sense
+  std::ifstream ingain(gainfile);
+  if(ingain.fail()) throw std::invalid_argument(std::string(BOLDRED) + std::string("PMT gains file ") + gainfile + std::string(" does not exist or failed to open") + std::string(RESET));
+  else std::cout<<GREEN<<"PMT gains file "<<gainfile<<" opened\n"<<RESET;
+
+  int bar,pmttop,pmtbot;
+  double topgain,botgain;
+  while (ingain.good()){
+    ingain>>bar>>pmttop>>topgain>>pmtbot>>botgain;
+    map_toppmts[bar]=pmttop;
+    map_bottompmts[bar]=pmtbot;
+    map_gainfactors[bar][0]=topgain;
+    map_gainfactors[bar][1]=botgain;
+  }
+  return;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void detector::fillmaps(std::string ExpInfoDir, std::string BarMapFile, std::string PosMapFile, std::string GainFile){
+  std::string BarMapFileName = ExpInfoDir+BarMapFile;
+  std::string PosMapFileName = ExpInfoDir+PosMapFile;
+  std::string GainFileName = ExpInfoDir+GainFile;
+  ReadMap(BarMapFileName);
+  ReadPositionMap(PosMapFileName);
+  ReadGains(GainFileName);
+  return;
+}
