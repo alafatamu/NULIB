@@ -8,7 +8,6 @@ using namespace eventdata;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 struct analysis_feed{
-  processed_event event;
   std::vector<double> E_top, E_bot; //energy in top, bottom PMT
   std::vector<double> E_tot; //Total energy (top+bottom PMT)
   std::vector<double> PSD_top, PSD_bot, PSD;

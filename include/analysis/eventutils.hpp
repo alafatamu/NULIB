@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "analysis/detector.hpp"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -22,14 +23,14 @@ namespace eventdata{
   struct processed_event{
     long long int timestamp;
     int hitcount;
-    std::vector<int> chip;
-    std::vector<int> chan;
-    std::vector<int> Aint;
-    std::vector<int> Bint;
-    std::vector<int> Cint;
-    std::vector<int> Tint;
-    std::vector<int> TDCchan;
-    std::vector<int> TDCval;
+    std::vector<int> chip; //need to fill
+    std::vector<int> chan; //need to fill
+    std::vector<int> Aint; //need to fill
+    std::vector<int> Bint; //need to fill
+    std::vector<int> Cint; //need to fill
+    std::vector<int> Tint; //need to fill
+    std::vector<int> TDCchan; //need to fill
+    std::vector<int> TDCval; //need to fill
 
     int coupledhits, barmult; 
     //coupledhits requires a multiplicity of 2.
@@ -41,10 +42,14 @@ namespace eventdata{
     std::vector<int> Bint_top, Bint_bot;
     std::vector<int> Cint_top, Cint_bot;
     std::vector<int> Tint_top, Tint_bot;
+    std::vector<int> TDCchan_top, TDCchan_bot;
+    std::vector<int> TDCval_top, TDCval_bot;
+
+    bool keep; //keep or toss depending on the processing
   };
 
   //Functions for handling the event data (and structs)
   void display_raw(raw_event);
   void display_event(processed_event);
-  processed_event process_raw_event(raw_event);
+  processed_event process_raw_event(raw_event, detector);
 }

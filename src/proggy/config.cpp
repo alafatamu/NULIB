@@ -37,8 +37,8 @@ std::string apply_default(const std::string& value, const std::string& fallback)
 
 } // namespace
 
-Config load_config(const std::string& path) {
-    Config cfg;  // starts with defaults from the struct
+INFOCON load_config(const std::string& path) {
+    INFOCON cfg;  // starts with defaults from the struct
 
     if (path.empty()) {
         return cfg;
@@ -46,7 +46,7 @@ Config load_config(const std::string& path) {
 
     std::ifstream file(path);
     if (!file) {
-        throw std::invalid_argument("Config file '" + path + "' failed to open");
+        throw std::invalid_argument("INFOCON file '" + path + "' failed to open");
     }
 
     using Handler = std::function<void(const std::string&)>;

@@ -2,7 +2,7 @@
 
 #include <string>
 
-struct Config {
+struct INFOCON {
     std::string TNDataDir = "/home/usr/TNDATA/";
     std::string ROOTDataDir = "../databox/";
     std::string OutputDir = "../databox/";
@@ -14,4 +14,4 @@ struct Config {
     std::string VertexFile = "reactionvertex.txt";
 };
 
-Config load_config(const std::string& path);
+INFOCON load_config(const std::string& path);

@@ -1,5 +1,4 @@
 //load detector/experiment mapping into detector object
-
 #include "analysis/detector.hpp"
 #include "proggy/tformat.hpp"
 #include "proggy/config.hpp"
@@ -34,7 +33,6 @@ double detector::get_offset(int chip, int chan, int osreq) { // osreq = offset r
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 // MAP READERS
-
 void detector::ReadMap(std::string barmapfile){
   //////////////////////////Read PMT channel map///////////////////////////////
   // This map had chip+channel information from the PSD chips. It
@@ -126,10 +124,10 @@ void detector::ReadGains(std::string gainfile){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void detector::fillmaps(std::string ExpInfoDir, std::string BarMapFile, std::string PosMapFile, std::string GainFile){
-  std::string BarMapFileName = ExpInfoDir+BarMapFile;
-  std::string PosMapFileName = ExpInfoDir+PosMapFile;
-  std::string GainFileName = ExpInfoDir+GainFile;
+void detector::fillmaps(INFOCON cfg){
+  std::string BarMapFileName = cfg.ExpInfoDir+cfg.BarMapFile;
+  std::string PosMapFileName = cfg.ExpInfoDir+cfg.PosMapFile;
+  std::string GainFileName = cfg.ExpInfoDir + cfg.GainFile;
   ReadMap(BarMapFileName);
   ReadPositionMap(PosMapFileName);
   ReadGains(GainFileName);

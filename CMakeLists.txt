@@ -10,11 +10,13 @@ find_package(ROOT REQUIRED COMPONENTS Tree RIO)
 
 add_library(core
     src/analysis/eventutils.cpp
+    src/analysis/detector.cpp
+    src/analysis/analysis.cpp
     src/io/evthandler.cpp
     src/io/baseroot.cpp
     src/io/dataref.cpp
-    src/proggy/bitutils.cpp
     src/proggy/config.cpp
+    src/proggy/bitutils.cpp
 )
 
 target_include_directories(core PUBLIC

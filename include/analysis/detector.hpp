@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "proggy/config.hpp"
 
 class detector{
   private:
@@ -42,6 +43,5 @@ class detector{
 		void ReadMap(std::string);
 		void ReadPositionMap(std::string);		
 		void ReadGains(std::string);		
-		void fillmaps(std::string, std::string, std::string, std::string);
-
+		void fillmaps(INFOCON);
 };

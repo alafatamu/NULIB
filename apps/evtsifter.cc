@@ -5,7 +5,7 @@
 
 int main(){
   int runreq = 0;
-  Config cfg = load_config("../info/config.cfg"); //read in the config from the given path
+  INFOCON cfg = load_config("../info/config.cfg"); //read in the config from the given path
   std::cout<<"Run to convert (0 to exit): "<<std::endl; std::cin>>runreq;
   if(runreq==0) return 0; //exit code
 
