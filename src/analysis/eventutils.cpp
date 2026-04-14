@@ -1,6 +1,7 @@
 #include "analysis/eventutils.hpp"
 
 #include <iostream>
+#include <unordered_set>
 
 //stuff used in event processing only
 #include "analysis/detector.hpp"
@@ -50,22 +51,32 @@ namespace eventdata{
     processed_event outevent;
     outevent.keep = false; //default is toss
     outevent.timestamp = rawevent.timestamp;
+    //Let's copy over the useful vectors.
+    outevent.chip = std::move(rawevent.chip);
+    outevent.chan = std::move(rawevent.chan);
+    outevent.Aint = std::move(rawevent.Aint);
+    outevent.Bint = std::move(rawevent.Bint);
+    outevent.Cint = std::move(rawevent.Cint);
+    outevent.Tint = std::move(rawevent.Tint);
+    outevent.TDCchan = std::move(rawevent.TDCchan);
+    outevent.TDCval = std::move(rawevent.TDCval);
 
-    int totalhits = rawevent.chip.size();
+    int totalhits = outevent.chip.size();
     int coupledhits = 0;
 
     std::vector<bool> used(totalhits, false); //keep track of which hits have been used
     for (int h=0;h<totalhits;h++){
-      int h_chip = rawevent.chip[h];
-      int h_chan = rawevent.chan[h];
+      int h_chip = outevent.chip[h];
+      int h_chan = outevent.chan[h];
       //check for the hit being used??
-      for(int j=h+1;j<totalhits;h++){
+      for(int j=h+1;j<totalhits;j++){
         if(used[j]) continue; //skip if already used
-        int j_chip = rawevent.chip[j];
-        int j_chan = rawevent.chan[j];
+        int j_chip = outevent.chip[j];
+        int j_chan = outevent.chan[j];
         if(texneut.getbar(h_chip,h_chan)!=texneut.getbar(j_chip,j_chan))continue; //confirm they are in the same bar
         int barseen=texneut.getbar(h_chip,h_chan);
         used[h]=used[j]=true;//now we can do our full processing
+        outevent.barshit.push_back(barseen);
         coupledhits++;
 
         //figure out top/bottom pmt ID confirmation
@@ -81,10 +92,10 @@ namespace eventdata{
         double topgain,botgain,Atop,Abot,Btop,Bbot;
         topgain = texneut.get_gainfactors(barseen,0);
         botgain = texneut.get_gainfactors(barseen,1);
-        Atop = (double)rawevent.Aint[t]*topgain-texneut.get_offset(t_chip,t_chan,0);
-        Abot = (double)rawevent.Aint[b]*botgain-texneut.get_offset(b_chip,b_chan,1);
-        Btop = (double)rawevent.Bint[t]*topgain-texneut.get_offset(t_chip,t_chan,1);
-        Bbot = (double)rawevent.Bint[t]*botgain-texneut.get_offset(b_chip,b_chan,0);
+        Atop = (double)outevent.Aint[t]*topgain-texneut.get_offset(t_chip,t_chan,0);
+        Abot = (double)outevent.Aint[b]*botgain-texneut.get_offset(b_chip,b_chan,1);
+        Btop = (double)outevent.Bint[t]*topgain-texneut.get_offset(t_chip,t_chan,1);
+        Bbot = (double)outevent.Bint[t]*botgain-texneut.get_offset(b_chip,b_chan,0);
 
         outevent.barshit.push_back(barseen);
 
@@ -92,36 +103,56 @@ namespace eventdata{
         outevent.chan_top.push_back(t_chan);
         outevent.Aint_top.push_back(Atop);
         outevent.Bint_top.push_back(Btop);
-        outevent.Cint_top.push_back(rawevent.Cint[t]);
-        outevent.Tint_top.push_back(rawevent.Tint[t]);
+        outevent.Cint_top.push_back(outevent.Cint[t]);
+        outevent.Tint_top.push_back(outevent.Tint[t]);
 
         outevent.chip_bot.push_back(b_chip);
         outevent.chan_bot.push_back(b_chan);
         outevent.Aint_bot.push_back(Abot);
         outevent.Bint_bot.push_back(Bbot);
-        outevent.Cint_bot.push_back(rawevent.Cint[b]);
-        outevent.Tint_bot.push_back(rawevent.Tint[b]);
+        outevent.Cint_bot.push_back(outevent.Cint[b]);
+        outevent.Tint_bot.push_back(outevent.Tint[b]);
 
-        int tdcchan_top = texneut.get_tdcchan(rawevent.chip[t],rawevent.chan[t]);
-        int tdcchan_bot = texneut.get_tdcchan(rawevent.chip[b],rawevent.chan[b]);
+        int tdcchan_top = texneut.get_tdcchan(outevent.chip[t],outevent.chan[t]);
+        int tdcchan_bot = texneut.get_tdcchan(outevent.chip[b],outevent.chan[b]);
         outevent.TDCchan_top.push_back(tdcchan_top);
         outevent.TDCchan_bot.push_back(tdcchan_bot);
         double tdc_topval, tdc_botval;
-        for(int m=0; m<rawevent.TDCchan.size(); m++){
-          for(int n=0; n<rawevent.TDCchan.size(); n++){
-            if(m==n || tdcchan_top!=rawevent.TDCchan[m] || tdcchan_bot!=rawevent.TDCchan[n])continue;
-            tdc_topval=-rawevent.TDCval[m]+4092;
-            tdc_botval=-rawevent.TDCval[n]+4092;
+        for(int m=0; m<outevent.TDCchan.size(); m++){
+          for(int n=0; n<outevent.TDCchan.size(); n++){
+            if(m==n || tdcchan_top!=outevent.TDCchan[m] || tdcchan_bot!=outevent.TDCchan[n])continue;
+            tdc_topval=-outevent.TDCval[m]+4092;
+            tdc_botval=-outevent.TDCval[n]+4092;
             //tdc_topval*=0.293;
             //tdc_botval*=0.293;
             outevent.TDCval_top.push_back(tdc_topval);
             outevent.TDCval_bot.push_back(tdc_botval);
           }
-        }    
+        }
       }
     }
+    if(coupledhits==0) return outevent; //NOTICE NO KEEP=TRUE HERE
+    //find bar multiplicity
+    std::unordered_set<int> multfinder(outevent.barshit.begin(),outevent.barshit.end());
+    outevent.barmult=multfinder.size();
+    if(outevent.barmult==0) return outevent; //NOTICE NO KEEP=TRUE HERE
+
+    //Once things look good, let's clean up the initial vectors and return a positive keep
+    for(int i=totalhits-1;i>=0;--i){
+      //std::cout<<"Looking at hit "<<i<<" // value: "<<used[i]<<std::endl;
+      if(!used[i]){
+        totalhits--;
+        outevent.chip.erase(outevent.chip.begin()+i);
+        outevent.chan.erase(outevent.chan.begin()+i);
+        outevent.Aint.erase(outevent.Aint.begin()+i);
+        outevent.Bint.erase(outevent.Bint.begin()+i);
+        outevent.Cint.erase(outevent.Cint.begin()+i);
+        outevent.Tint.erase(outevent.Tint.begin()+i);
+      };
+    }
+
     //only keep the event if we can successfully process it and things look good
-    if(coupledhits!=0&&outevent.barshit.size()!=0) outevent.keep=true;
+    outevent.keep=true;
     return outevent;
   }
 }

@@ -40,8 +40,8 @@ class detector{
     int get_bottom_pmt_id(int);
 	
 		// MAP READERS
-		void ReadMap(std::string);
-		void ReadPositionMap(std::string);		
-		void ReadGains(std::string);		
-		void fillmaps(INFOCON);
+		bool ReadMap(std::string);
+		bool ReadPositionMap(std::string);		
+		bool ReadGains(std::string);		
+		bool fill_maps(INFOCON);
 };

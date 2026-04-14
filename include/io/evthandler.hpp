@@ -1,5 +1,6 @@
 #pragma once 
 #include "analysis/eventutils.hpp"
+#include "analysis/detector.hpp"
 
 #include <string>
 #include <fstream>

@@ -14,4 +14,4 @@ struct INFOCON {
     std::string VertexFile = "reactionvertex.txt";
 };
 
-INFOCON load_config(const std::string& path);
+INFOCON load_config(const std::string&);
