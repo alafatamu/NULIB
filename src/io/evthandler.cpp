@@ -212,6 +212,7 @@ namespace {
       }
 
       int totalhits = XLMwordcount/5; //XLM has multiples of 5 words
+      rawevent.hitcount = totalhits;
       if(printout) std::cout<<"The XLM will read out 5 words per hit in the event. The total number of hits is: "<<totalhits<<std::endl;
       if(XLMwordcount%5 != 0 || XLMwordcount > 4095 || totalhits > 32 || totalhits < 1){
         if(printout) std::cout<<RED<<"-> Rejection by wordcount (not a multiple of 5, too many hits, or too few hits)"<<RESET<<std::endl;

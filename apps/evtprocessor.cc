@@ -25,7 +25,7 @@ int main(){
 
   std::string OutputROOTFileName = namebuilder::get_OutputROOTName(cfg, runreq); //generate an output file name
 
-  int result = rooty::Evt_to_ROOT(InputEvtFile, OutputROOTFileName, texneut); //read through the file
+  int result = Evt_to_ROOT(InputEvtFile, OutputROOTFileName, texneut); //read through the file
   if(result==0){
     std::cout<<RED<<"Run "<<runreq<<" read failed."<<RESET<<std::endl;
   }else if(result==1){

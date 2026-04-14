@@ -9,6 +9,7 @@ namespace eventdata{
   //Useful Structs for passing data around
   struct raw_event{
     long long int timestamp;
+    int hitcount;
     std::vector<int> chip;
     std::vector<int> chan;
     std::vector<int> Aint;
