@@ -93,7 +93,7 @@ namespace {
           std::cout<<"Here, we are given the validity of the data according to the TDC itself: "<<(TDCword&0x2000)<<std::endl;
         }
         wordsread++;
-        if((TDCword&0x4000)==0){ //if validity is 0 (not valid), remove the last channel entry and continue
+        if((TDCword&0x2000)==0){ //if validity is 0 (not valid), remove the last channel entry and continue
           if(printout) std::cout<<"Seeing as the validity is 0, we'll remove the last channel entry and continue..."<<std::endl;
           event.TDCchan.pop_back(); //can't reach this point without filling the channel vector with SOMETHING
           continue;
@@ -104,7 +104,7 @@ namespace {
           std::cout<<"ChatGPT claims the value is actually TDCword&0x07FF (11-bit): ";
           std::cout<<(TDCword&0x07FF)<<" or TDCword&0x0FFF (12-bit)"<<(TDCword&0x0FFF)<<std::endl;
         }
-        event.TDCval.push_back((TDCword&0x3800));
+        event.TDCval.push_back((TDCword&0x07FF)); //11 bit value assumption
       }else if(opener==84){
         if(printout) std::cout<<"The first byte of this word is 84. This means we have reached the end of the data..."<<std::endl;
         TDCword=*p++;
