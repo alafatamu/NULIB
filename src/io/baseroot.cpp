@@ -1,6 +1,7 @@
 #include "io/baseroot.hpp"
 #include "io/evthandler.hpp"
 #include "analysis/eventutils.hpp"
+#include "analysis/analysis.hpp"
 #include "proggy/tformat.hpp"
 #include "TTree.h"
 #include "TFile.h"
@@ -56,13 +57,13 @@ namespace treebiz{
 
   struct ATreeData{ //analysis data tree
     long long int timestamp = 0;
-    int hitcount = 0;
-    std::vector<int> E_top, E_bot; //energy in top, bottom PMT
-    std::vector<int> E_tot; //Total energy (top+bottom PMT)
-    std::vector<int> PSD_top, PSD_bot, PSD;
+    int coupledhits = 0;
+    std::vector<double> E_top, E_bot; //energy in top, bottom PMT
+    std::vector<double> E_tot; //Total energy (top+bottom PMT)
+    std::vector<double> PSD_top, PSD_bot, PSD;
     std::vector<int> PSDflag;
-    std::vector<int> xhit, yhit, zhit; //hit location 
-    std::vector<int> rho, theta, phi;
+    std::vector<double> xhit, yhit, zhit; //hit location 
+    std::vector<double> rho, theta, phi;
   };
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -119,20 +120,20 @@ namespace treebiz{
 
   void init_ATree(TTree& tree, treebiz::ATreeData& AData){
     tree.Branch("timestamp", &AData.timestamp);
-    tree.Branch("hitcount", &AData.hitcount);
+    tree.Branch("coupledhits", &AData.coupledhits);
     tree.Branch("E_top", &AData.E_top);
     tree.Branch("E_bot", &AData.E_bot);
     tree.Branch("E_tot", &AData.E_tot);
     tree.Branch("PSD_top", &AData.PSD_top);
     tree.Branch("PSD_bot", &AData.PSD_bot);
     tree.Branch("PSD", &AData.PSD);
-    tree.Branch("PSDflag", &AData.PSDflag);
-    tree.Branch("xhit", &AData.xhit);
-    tree.Branch("yhit", &AData.yhit);
-    tree.Branch("zhit", &AData.zhit);
-    tree.Branch("rho", &AData.rho);
-    tree.Branch("theta", &AData.theta);
-    tree.Branch("phi", &AData.phi);
+    //tree.Branch("PSDflag", &AData.PSDflag);
+    //tree.Branch("xhit", &AData.xhit);
+    //tree.Branch("yhit", &AData.yhit);
+    //tree.Branch("zhit", &AData.zhit);
+    //tree.Branch("rho", &AData.rho);
+    //tree.Branch("theta", &AData.theta);
+    //tree.Branch("phi", &AData.phi);
     return;
   }
 
@@ -187,6 +188,25 @@ namespace treebiz{
     PData.barmult = processedevent.barmult;
     return;
   }
+
+  void fill_ATreeData(treebiz::ATreeData& AData, analysis_feed& AFeed){
+    AData.timestamp = AFeed.timestamp;
+    AData.coupledhits = AFeed.coupledhits;
+    AData.E_top = AFeed.E_top;
+    AData.E_bot = AFeed.E_bot;
+    AData.E_tot = AFeed.E_tot;
+    AData.PSD_top = AFeed.PSD_top;
+    AData.PSD_bot = AFeed.PSD_bot;
+    AData.PSD = AFeed.PSD;
+    //AData.PSDflag = AFeed.PSDflag;
+    //AData.xhit = AFeed.xhit;
+    //AData.yhit = AFeed.yhit;
+    //AData.zhit = AFeed.zhit;
+    //AData.rho = AFeed.rho;
+    //AData.theta = AFeed.theta;
+    //AData.phi = AFeed.phi;
+    return;
+  }
 }
 
 int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detector texneut){
@@ -199,6 +219,10 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detecto
   TTree PTree("processed", "Processed event data");
   treebiz::PTreeData PData;
   treebiz::init_PTree(PTree, PData);
+
+  TTree ATree("analysis", "Analysis event data");
+  treebiz::ATreeData AData;
+  treebiz::init_ATree(ATree, AData);
 
   bool stillreading = true;
   int eventnumber = 0;
@@ -218,6 +242,11 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detecto
         goodcount++;
         treebiz::fill_PTreeData(PData, processedevent);
         PTree.Fill();
+        analysis_feed AFeed = Analyse(processedevent, texneut);
+        std::cout<<" // AFeed.timstamp: "<<AFeed.timestamp;
+        std::cout<<" // AFeed.coupledhits: "<<AFeed.coupledhits<<std::endl;
+        treebiz::fill_ATreeData(AData, AFeed);
+        ATree.Fill();
       }else continue;
     }else if(rawevent.unpackflag==2||rawevent.unpackflag==3) stillreading = false;
     if(!stillreading)break;
@@ -231,6 +260,7 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detecto
   std::cout<<"Saving root trees to file..."<<std::endl;
   RTree.Write();
   PTree.Write();
+  ATree.Write();
   ROOTOutputFile.Close();
 
   std::cout<<"Done!"<<std::endl;

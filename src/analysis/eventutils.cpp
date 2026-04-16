@@ -150,6 +150,7 @@ namespace eventdata{
         outevent.Tint.erase(outevent.Tint.begin()+i);
       };
     }
+    outevent.coupledhits = coupledhits; //can't forget this one!
 
     //only keep the event if we can successfully process it and things look good
     outevent.keep=true;
