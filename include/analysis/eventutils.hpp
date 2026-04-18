@@ -5,7 +5,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-namespace eventdata{
+namespace eventutils{
   //Useful Structs for passing data around
   struct raw_event{
     long long int timestamp;

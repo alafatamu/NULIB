@@ -7,7 +7,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-analysis_feed Analyse(eventdata::processed_event& event, detector& texneut){
+analysis_feed Analyse(eventutils::processed_event& event, detector& texneut){
   analysis_feed AFeed;
   AFeed.timestamp = event.timestamp;
   AFeed.coupledhits = event.coupledhits;

@@ -16,4 +16,4 @@ struct analysis_feed{
   std::vector<double> rho, theta, phi;
 };
 
-analysis_feed Analyse(eventdata::processed_event&, detector&);
+analysis_feed Analyse(eventutils::processed_event&, detector&);

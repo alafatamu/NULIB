@@ -10,7 +10,7 @@
 #include <fstream>
 #include <string>
 
-using namespace eventdata;
+using namespace eventutils;
 using namespace tformat;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -139,7 +139,7 @@ namespace treebiz{
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
   //TREE FILLING
-  void fill_RTreeData(treebiz::RTreeData& RData, eventdata::raw_event& rawevent){
+  void fill_RTreeData(treebiz::RTreeData& RData, eventutils::raw_event& rawevent){
     RData.timestamp = rawevent.timestamp;
     RData.hitcount = rawevent.hitcount;
     RData.chip = rawevent.chip;
@@ -153,7 +153,7 @@ namespace treebiz{
     return;
   }
 
-  void fill_PTreeData(treebiz::PTreeData& PData, eventdata::processed_event& processedevent){
+  void fill_PTreeData(treebiz::PTreeData& PData, eventutils::processed_event& processedevent){
     PData.timestamp = processedevent.timestamp;
     PData.hitcount = processedevent.hitcount;
     PData.chip = processedevent.chip;
@@ -237,7 +237,7 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detecto
     if(rawevent.unpackflag==1){
       treebiz::fill_RTreeData(RData, rawevent);
       RTree.Fill();
-      processed_event processedevent = eventdata::process_event(rawevent, texneut);
+      processed_event processedevent = eventutils::process_event(rawevent, texneut);
       if(processedevent.keep){
         goodcount++;
         treebiz::fill_PTreeData(PData, processedevent);

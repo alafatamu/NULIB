@@ -9,5 +9,5 @@
 
 int inspect_evt_file(std::ifstream&);
 int convert_evt_file(std::ifstream&);
-eventdata::raw_event grab_event(std::ifstream&);
+eventutils::raw_event grab_event(std::ifstream&);
 std::ifstream grabfile(std::string);

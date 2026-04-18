@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 
-using namespace eventdata;
+using namespace eventutils;
 using namespace tformat;
 using namespace bitutils;
 

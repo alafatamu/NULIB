@@ -9,7 +9,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-namespace eventdata{
+namespace eventutils{
   void display_raw(const raw_event& event){
     std::cout<<"Timestamp: "<<event.timestamp<<std::endl;
     for(int i=0;i<event.chip.size();i++){
