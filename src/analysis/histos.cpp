@@ -147,8 +147,8 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
   TH1F* Bint_top_h = new TH1F("Bint_top", "Bint_top", 1250, 0, 3500);
   TH1F* Cint_top_h = new TH1F("Cint_top", "Cint_top", 1250, 0, 3500);
   TH1F* Tint_top_h = new TH1F("Tint_top", "Tint_top", 2000, 0, 8000);
-  TH1F* TDCchan_top_h = new TH1F("TDCchan_top", "TDCchan_top", 16, 0, 16);
-  TH1F* TDCval_top_h = new TH1F("TDCval_top", "TDCval_top", 2500, 0, 5000);
+  //TH1F* TDCchan_top_h = new TH1F("TDCchan_top", "TDCchan_top", 16, 0, 16);
+  //TH1F* TDCval_top_h = new TH1F("TDCval_top", "TDCval_top", 2500, 0, 5000);
 
   TH1F* chip_bot_h = new TH1F("chip_bot", "chip_bot", 16, 0, 16);
   TH1F* chan_bot_h = new TH1F("chan_bot", "chan_bot", 8, 0, 8);
@@ -156,8 +156,8 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
   TH1F* Bint_bot_h = new TH1F("Bint_bot", "Bint_bot", 1250, 0, 3500);
   TH1F* Cint_bot_h = new TH1F("Cint_bot", "Cint_bot", 1250, 0, 3500);
   TH1F* Tint_bot_h = new TH1F("Tint_bot", "Tint_bot", 2000, 0, 8000);
-  TH1F* TDCchan_bot_h = new TH1F("TDCchan_bot", "TDCchan_bot", 16, 0, 16);
-  TH1F* TDCval_bot_h = new TH1F("TDCval_bot", "TDCval_bot", 2500, 0, 5000);
+  //TH1F* TDCchan_bot_h = new TH1F("TDCchan_bot", "TDCchan_bot", 16, 0, 16);
+  //TH1F* TDCval_bot_h = new TH1F("TDCval_bot", "TDCval_bot", 2500, 0, 5000);
 
   TH1F* barshit_h = new TH1F("barshit", "barshit", 128, 0, 128);
   TH1F* coupledhits_h = new TH1F("coupledhits", "coupledhits", 5, 0, 5);
@@ -176,15 +176,15 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
       Cint_h->Fill((*PData.Cint)[j]);
       Tint_h->Fill((*PData.Tint)[j]);
     }
-    for(int j=0; j<(*PData.chip_top).size(); j++){
+
+    for(int j=0; j<PData.coupledhits; j++){
       chip_top_h->Fill((*PData.chip_top)[j]);
       chan_top_h->Fill((*PData.chan_top)[j]);
       Aint_top_h->Fill((*PData.Aint_top)[j]);
       Bint_top_h->Fill((*PData.Bint_top)[j]);
       Cint_top_h->Fill((*PData.Cint_top)[j]);
       Tint_top_h->Fill((*PData.Tint_top)[j]);
-    }
-    for(int j=0; j<(*PData.chip_bot).size(); j++){
+
       chip_bot_h->Fill((*PData.chip_bot)[j]);
       chan_bot_h->Fill((*PData.chan_bot)[j]);
       Aint_bot_h->Fill((*PData.Aint_bot)[j]);
@@ -192,19 +192,25 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
       Cint_bot_h->Fill((*PData.Cint_bot)[j]);
       Tint_bot_h->Fill((*PData.Tint_bot)[j]);
     }
-
+    
+    //std::cout<<"TDC data size: "<<(*PData.TDCchan).size()<<std::endl;
     for(int j=0; j<(*PData.TDCchan).size(); j++){
       TDCchan_h->Fill((*PData.TDCchan)[j]);
       TDCval_h->Fill((*PData.TDCval)[j]);
     }
+    /*
+    std::cout<<"TDC top chan size: "<<(*PData.TDCchan_top).size()<<std::endl;
+    std::cout<<"TDC top val size: "<<(*PData.TDCval_top).size()<<std::endl;
     for(int j=0; j<(*PData.TDCchan_top).size(); j++){
       TDCchan_top_h->Fill((*PData.TDCchan_top)[j]);
       TDCval_top_h->Fill((*PData.TDCval_top)[j]);
     }
+    std::cout<<"TDC bot chan size: "<<(*PData.TDCchan_bot).size()<<std::endl;
+    std::cout<<"TDC bot val size: "<<(*PData.TDCval_top).size()<<std::endl;
     for(int j=0; j<(*PData.TDCchan_bot).size(); j++){
       TDCchan_bot_h->Fill((*PData.TDCchan_bot)[j]);
       TDCval_bot_h->Fill((*PData.TDCval_bot)[j]);
-    }
+    }*/
 
     coupledhits_h->Fill(PData.coupledhits);
     barmult_h->Fill(PData.barmult);
@@ -231,8 +237,8 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
   Bint_top_h->Write();
   Cint_top_h->Write();
   Tint_top_h->Write();
-  TDCchan_top_h->Write();
-  TDCval_top_h->Write();
+  //TDCchan_top_h->Write();
+  //TDCval_top_h->Write();
 
   P_dirbot->cd();
   chip_bot_h->Write();
@@ -241,8 +247,8 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
   Bint_bot_h->Write();
   Cint_bot_h->Write();
   Tint_bot_h->Write();
-  TDCchan_bot_h->Write();
-  TDCval_bot_h->Write();
+  //TDCchan_bot_h->Write();
+  //TDCval_bot_h->Write();
 
   std::cout<<"Processed histograms saved..."<<std::endl;
 

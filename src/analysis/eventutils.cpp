@@ -112,7 +112,7 @@ namespace eventutils{
         outevent.Bint_bot.push_back(Bbot);
         outevent.Cint_bot.push_back(outevent.Cint[b]);
         outevent.Tint_bot.push_back(outevent.Tint[b]);
-
+/*
         int tdcchan_top = texneut.get_tdcchan(outevent.chip[t],outevent.chan[t]);
         int tdcchan_bot = texneut.get_tdcchan(outevent.chip[b],outevent.chan[b]);
         outevent.TDCchan_top.push_back(tdcchan_top);
@@ -128,7 +128,7 @@ namespace eventutils{
             outevent.TDCval_top.push_back(tdc_topval);
             outevent.TDCval_bot.push_back(tdc_botval);
           }
-        }
+        }*/
       }
     }
     if(coupledhits==0) return outevent; //NOTICE NO KEEP=TRUE HERE

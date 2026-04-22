@@ -38,8 +38,8 @@ namespace treebiz{
     tree.Branch("Bint_top", &PData.Bint_top);
     tree.Branch("Cint_top", &PData.Cint_top);
     tree.Branch("Tint_top", &PData.Tint_top);
-    tree.Branch("TDCchan_top", &PData.TDCchan_top);
-    tree.Branch("TDCval_top", &PData.TDCval_top);
+    //tree.Branch("TDCchan_top", &PData.TDCchan_top);
+    //tree.Branch("TDCval_top", &PData.TDCval_top);
 
     tree.Branch("chip_bot", &PData.chip_bot);
     tree.Branch("chan_bot", &PData.chan_bot);
@@ -47,8 +47,8 @@ namespace treebiz{
     tree.Branch("Bint_bot", &PData.Bint_bot);
     tree.Branch("Cint_bot", &PData.Cint_bot);
     tree.Branch("Tint_bot", &PData.Tint_bot);
-    tree.Branch("TDCchan_bot", &PData.TDCchan_bot);
-    tree.Branch("TDCval_bot", &PData.TDCval_bot);
+    //tree.Branch("TDCchan_bot", &PData.TDCchan_bot);
+    //tree.Branch("TDCval_bot", &PData.TDCval_bot);
 
     tree.Branch("barshit", &PData.barshit);
     tree.Branch("coupledhits", &PData.coupledhits);
@@ -109,8 +109,8 @@ namespace treebiz{
     PData.Bint_top = processedevent.Bint_top;
     PData.Cint_top = processedevent.Cint_top;
     PData.Tint_top = processedevent.Tint_top;
-    PData.TDCchan_top = processedevent.TDCchan_top;
-    PData.TDCval_top = processedevent.TDCval_top;
+    //PData.TDCchan_top = processedevent.TDCchan_top;
+    //PData.TDCval_top = processedevent.TDCval_top;
 
     PData.chip_bot = processedevent.chip_bot;
     PData.chan_bot = processedevent.chan_bot;
@@ -118,8 +118,8 @@ namespace treebiz{
     PData.Bint_bot = processedevent.Bint_bot;
     PData.Cint_bot = processedevent.Cint_bot;
     PData.Tint_bot = processedevent.Tint_bot;
-    PData.TDCchan_bot = processedevent.TDCchan_bot;
-    PData.TDCval_bot = processedevent.TDCval_bot;
+    //PData.TDCchan_bot = processedevent.TDCchan_bot;
+    //PData.TDCval_bot = processedevent.TDCval_bot;
 
     PData.barshit = processedevent.barshit;
     PData.coupledhits = processedevent.coupledhits;
@@ -180,8 +180,8 @@ namespace treebiz{
     tree.SetBranchAddress("Bint_top", &PData.Bint_top);
     tree.SetBranchAddress("Cint_top", &PData.Cint_top);
     tree.SetBranchAddress("Tint_top", &PData.Tint_top);
-    tree.SetBranchAddress("TDCchan_top", &PData.TDCchan_top);
-    tree.SetBranchAddress("TDCval_top", &PData.TDCval_top);
+    //tree.SetBranchAddress("TDCchan_top", &PData.TDCchan_top);
+    //tree.SetBranchAddress("TDCval_top", &PData.TDCval_top);
 
     tree.SetBranchAddress("chip_bot", &PData.chip_bot);
     tree.SetBranchAddress("chan_bot", &PData.chan_bot);
@@ -189,8 +189,8 @@ namespace treebiz{
     tree.SetBranchAddress("Bint_bot", &PData.Bint_bot);
     tree.SetBranchAddress("Cint_bot", &PData.Cint_bot);
     tree.SetBranchAddress("Tint_bot", &PData.Tint_bot);
-    tree.SetBranchAddress("TDCchan_bot", &PData.TDCchan_bot);
-    tree.SetBranchAddress("TDCval_bot", &PData.TDCval_bot);
+    //tree.SetBranchAddress("TDCchan_bot", &PData.TDCchan_bot);
+    //tree.SetBranchAddress("TDCval_bot", &PData.TDCval_bot);
 
     tree.SetBranchAddress("barshit", &PData.barshit);
     tree.SetBranchAddress("coupledhits", &PData.coupledhits);

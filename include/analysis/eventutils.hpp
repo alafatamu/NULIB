@@ -43,8 +43,8 @@ namespace eventutils{
     std::vector<int> Bint_top, Bint_bot;
     std::vector<int> Cint_top, Cint_bot;
     std::vector<int> Tint_top, Tint_bot;
-    std::vector<int> TDCchan_top, TDCchan_bot;
-    std::vector<int> TDCval_top, TDCval_bot;
+    //std::vector<int> TDCchan_top, TDCchan_bot;
+    //std::vector<int> TDCval_top, TDCval_bot;
 
     bool keep; //keep or toss depending on the processing
   };

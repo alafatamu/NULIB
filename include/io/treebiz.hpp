@@ -40,8 +40,8 @@ namespace treebiz{
     std::vector<int> Bint_top,Bint_bot;
     std::vector<int> Cint_top,Cint_bot;
     std::vector<int> Tint_top,Tint_bot;
-    std::vector<int> TDCchan_top,TDCchan_bot;
-    std::vector<int> TDCval_top,TDCval_bot;
+    //std::vector<int> TDCchan_top,TDCchan_bot;
+    //std::vector<int> TDCval_top,TDCval_bot;
     std::vector<int> barshit;
     int coupledhits = 0;
     int barmult = 0;
@@ -96,10 +96,10 @@ namespace treebiz{
     std::vector<int>* Cint_bot = nullptr;
     std::vector<int>* Tint_top = nullptr;
     std::vector<int>* Tint_bot = nullptr;
-    std::vector<int>* TDCchan_top = nullptr;
-    std::vector<int>* TDCchan_bot = nullptr;
-    std::vector<int>* TDCval_top = nullptr; 
-    std::vector<int>* TDCval_bot = nullptr;
+    //std::vector<int>* TDCchan_top = nullptr;
+    //std::vector<int>* TDCchan_bot = nullptr;
+    //std::vector<int>* TDCval_top = nullptr; 
+    //std::vector<int>* TDCval_bot = nullptr;
 
     std::vector<int>* barshit = nullptr;
     int coupledhits = 0;
