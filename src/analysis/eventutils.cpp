@@ -151,6 +151,7 @@ namespace eventutils{
       };
     }
     outevent.coupledhits = coupledhits; //can't forget this one!
+    outevent.hitcount = outevent.chip.size(); //can't forget this one!
 
     //only keep the event if we can successfully process it and things look good
     outevent.keep=true;

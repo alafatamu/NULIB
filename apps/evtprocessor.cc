@@ -34,8 +34,10 @@ int main(){
     std::string HDumpName = namebuilder::get_OutputROOTName(cfg, runreq, "_histos"); //generate a histos file name
     std::cout<<"Dumping histograms to "<<HDumpName<<std::endl;
     base_histos(OutputROOTFileName, HDumpName); //dump the histograms
+    proc_histos(OutputROOTFileName, HDumpName); //dump the histograms
   }
 
+  std::cout<<"Done!"<<std::endl;
   InputEvtFile.close();
   return 0;
 }
