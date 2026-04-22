@@ -4,6 +4,7 @@
 #include "proggy/tformat.hpp"
 #include "io/baseroot.hpp"
 #include "analysis/detector.hpp"
+#include "analysis/histos.hpp"
 
 using namespace tformat;
 
@@ -30,6 +31,9 @@ int main(){
     std::cout<<RED<<"Run "<<runreq<<" read failed."<<RESET<<std::endl;
   }else if(result==1){
     std::cout<<GREEN<<"Run "<<runreq<<" successfully read."<<RESET<<std::endl;
+    std::string HDumpName = namebuilder::get_OutputROOTName(cfg, runreq, "_histos"); //generate a histos file name
+    std::cout<<"Dumping histograms to "<<HDumpName<<std::endl;
+    base_histos(OutputROOTFileName, HDumpName); //dump the histograms
   }
 
   InputEvtFile.close();
