@@ -1,6 +1,5 @@
 #include "io/treebiz.hpp"
 #include "analysis/eventutils.hpp"
-#include "analysis/analysis.hpp"
 #include "TTree.h"
 
 #include <vector>
@@ -59,19 +58,30 @@ namespace treebiz{
   void init_ATree(TTree& tree, treebiz::ATreeData& AData){
     tree.Branch("timestamp", &AData.timestamp);
     tree.Branch("coupledhits", &AData.coupledhits);
-    tree.Branch("E_top", &AData.E_top);
-    tree.Branch("E_bot", &AData.E_bot);
-    tree.Branch("E_tot", &AData.E_tot);
+    tree.Branch("barshit", &AData.barshit);
+    tree.Branch("chip_top", &AData.chip_top);
+    tree.Branch("chip_bot", &AData.chip_bot);
+    tree.Branch("chan_top", &AData.chan_top);
+    tree.Branch("chan_bot", &AData.chan_bot);
+    tree.Branch("Aint_top", &AData.Aint_top);
+    tree.Branch("Aint_bot", &AData.Aint_bot);
+    tree.Branch("Bint_top", &AData.Bint_top);
+    tree.Branch("Bint_bot", &AData.Bint_bot);
+    tree.Branch("Cint_top", &AData.Cint_top);
+    tree.Branch("Cint_bot", &AData.Cint_bot);
+    tree.Branch("Tint_top", &AData.Tint_top);
+    tree.Branch("Tint_bot", &AData.Tint_bot);
+
     tree.Branch("PSD_top", &AData.PSD_top);
     tree.Branch("PSD_bot", &AData.PSD_bot);
-    tree.Branch("PSD", &AData.PSD);
-    //tree.Branch("PSDflag", &AData.PSDflag);
-    //tree.Branch("xhit", &AData.xhit);
-    //tree.Branch("yhit", &AData.yhit);
-    //tree.Branch("zhit", &AData.zhit);
-    //tree.Branch("rho", &AData.rho);
-    //tree.Branch("theta", &AData.theta);
-    //tree.Branch("phi", &AData.phi);
+    tree.Branch("PSD", &AData.PSD); 
+    tree.Branch("xhit", &AData.xhit);
+    tree.Branch("yhit", &AData.yhit);
+    tree.Branch("zhit", &AData.zhit);
+    tree.Branch("rho", &AData.rho);
+    tree.Branch("theta", &AData.theta);
+    tree.Branch("phi", &AData.phi);
+    tree.Branch("E_calc", &AData.E_calc);
     return;
   }
 
@@ -127,22 +137,34 @@ namespace treebiz{
     return;
   }
 
-  void fill_ATreeData(treebiz::ATreeData& AData, analysis_feed& AFeed){
-    AData.timestamp = AFeed.timestamp;
-    AData.coupledhits = AFeed.coupledhits;
-    AData.E_top = AFeed.E_top;
-    AData.E_bot = AFeed.E_bot;
-    AData.E_tot = AFeed.E_tot;
-    AData.PSD_top = AFeed.PSD_top;
-    AData.PSD_bot = AFeed.PSD_bot;
-    AData.PSD = AFeed.PSD;
-    //AData.PSDflag = AFeed.PSDflag;
-    //AData.xhit = AFeed.xhit;
-    //AData.yhit = AFeed.yhit;
-    //AData.zhit = AFeed.zhit;
-    //AData.rho = AFeed.rho;
-    //AData.theta = AFeed.theta;
-    //AData.phi = AFeed.phi;
+  void fill_ATreeData(treebiz::ATreeData& AData, eventutils::analysed_event& analysedevent){
+    AData.timestamp = analysedevent.timestamp;
+    AData.coupledhits = analysedevent.coupledhits;
+    AData.barshit = analysedevent.barshit;
+    AData.chip_top = analysedevent.chip_top;
+    AData.chip_bot = analysedevent.chip_bot;
+    AData.chan_top = analysedevent.chan_top;
+    AData.chan_bot = analysedevent.chan_bot;
+    AData.Aint_top = analysedevent.Aint_top;
+    AData.Aint_bot = analysedevent.Aint_bot;
+    AData.Bint_top = analysedevent.Bint_top;
+    AData.Bint_bot = analysedevent.Bint_bot;
+    AData.Cint_top = analysedevent.Cint_top;
+    AData.Cint_bot = analysedevent.Cint_bot;
+    AData.Tint_top = analysedevent.Tint_top;
+    AData.Tint_bot = analysedevent.Tint_bot;
+
+    AData.PSD_top = analysedevent.PSDtop;
+    AData.PSD_bot = analysedevent.PSDbot;
+    AData.PSD = analysedevent.PSD;
+
+    AData.xhit = analysedevent.xhit;
+    AData.yhit = analysedevent.yhit;
+    AData.zhit = analysedevent.zhit;
+    AData.rho = analysedevent.rho;
+    AData.theta = analysedevent.theta;
+    AData.phi = analysedevent.phi;
+    AData.E_calc = analysedevent.E_calc;
     return;
   }
 
@@ -201,19 +223,18 @@ namespace treebiz{
   void set_ATreeBranches(TTree& tree, treebiz::ATreeReadData& AData){
     tree.SetBranchAddress("timestamp", &AData.timestamp);
     tree.SetBranchAddress("coupledhits", &AData.coupledhits);
-    tree.SetBranchAddress("E_top", &AData.E_top);
-    tree.SetBranchAddress("E_bot", &AData.E_bot);
-    tree.SetBranchAddress("E_tot", &AData.E_tot);
+    tree.SetBranchAddress("barshit", &AData.barshit);
+
     tree.SetBranchAddress("PSD_top", &AData.PSD_top);
     tree.SetBranchAddress("PSD_bot", &AData.PSD_bot);
     tree.SetBranchAddress("PSD", &AData.PSD);
-    //tree.SetBranchAddress("PSDflag", &AData.PSDflag);
-    //tree.SetBranchAddress("xhit", &AData.xhit);
-    //tree.SetBranchAddress("yhit", &AData.yhit);
-    //tree.SetBranchAddress("zhit", &AData.zhit);
-    //tree.SetBranchAddress("rho", &AData.rho);
-    //tree.SetBranchAddress("theta", &AData.theta);
-    //tree.SetBranchAddress("phi", &AData.phi);
+    tree.SetBranchAddress("xhit", &AData.xhit);
+    tree.SetBranchAddress("yhit", &AData.yhit);
+    tree.SetBranchAddress("zhit", &AData.zhit);
+    tree.SetBranchAddress("rho", &AData.rho);
+    tree.SetBranchAddress("theta", &AData.theta);
+    tree.SetBranchAddress("phi", &AData.phi);
+    tree.SetBranchAddress("E_calc", &AData.E_calc);
     return;
   }
 }

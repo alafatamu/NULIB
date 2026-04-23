@@ -49,8 +49,26 @@ namespace eventutils{
     bool keep; //keep or toss depending on the processing
   };
 
+  struct analysed_event{
+    long long int timestamp;
+    int coupledhits;
+    std::vector<int> barshit;
+    std::vector<int> chip_top, chip_bot;
+    std::vector<int> chan_top, chan_bot;
+    std::vector<int> Aint_top, Aint_bot;
+    std::vector<int> Bint_top, Bint_bot;
+    std::vector<int> Cint_top, Cint_bot;
+    std::vector<int> Tint_top, Tint_bot;
+
+    std::vector<double> PSD, PSDtop, PSDbot;
+    std::vector<double> xhit, yhit, zhit;
+    std::vector<double> rho, theta, phi;
+    std::vector<double> E_calc;
+  };
+
   //Functions for handling the event data (and structs)
   void display_raw(raw_event);
   void display_event(processed_event);
   processed_event process_event(raw_event, detector);
+  analysed_event analyse_event(processed_event);
 }

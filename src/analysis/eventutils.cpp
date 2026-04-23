@@ -50,8 +50,8 @@ namespace eventutils{
   processed_event process_event(raw_event rawevent, detector texneut){
     processed_event outevent;
     outevent.keep = false; //default is toss
+    //Let's copy over the raw data
     outevent.timestamp = rawevent.timestamp;
-    //Let's copy over the useful vectors.
     outevent.chip = std::move(rawevent.chip);
     outevent.chan = std::move(rawevent.chan);
     outevent.Aint = std::move(rawevent.Aint);
@@ -61,23 +61,24 @@ namespace eventutils{
     outevent.TDCchan = std::move(rawevent.TDCchan);
     outevent.TDCval = std::move(rawevent.TDCval);
 
-    int totalhits = outevent.chip.size();
-    int coupledhits = 0;
+    int totalhits = outevent.chip.size(); //total number of hits in this event. 
+    int coupledhits = 0; //We'll need to find events that are coupled to each other
 
     std::vector<bool> used(totalhits, false); //keep track of which hits have been used
-    for (int h=0;h<totalhits;h++){
+    for (int h=0;h<totalhits;h++){ //for each hit in the event, grab the chip and channel
+      if(used[h]) continue; //skip if already used
       int h_chip = outevent.chip[h];
       int h_chan = outevent.chan[h];
-      //check for the hit being used??
-      for(int j=h+1;j<totalhits;j++){
+      for(int j=h+1;j<totalhits;j++){ //Once h is grabbed, compare to all other hits in the event
         if(used[j]) continue; //skip if already used
         int j_chip = outevent.chip[j];
         int j_chan = outevent.chan[j];
+
         if(texneut.getbar(h_chip,h_chan)!=texneut.getbar(j_chip,j_chan))continue; //confirm they are in the same bar
-        int barseen=texneut.getbar(h_chip,h_chan);
+        int barseen=texneut.getbar(h_chip,h_chan); //store bar number in a variable for later use
+        outevent.barshit.push_back(barseen); //record the bar number in the event object
         used[h]=used[j]=true;//now we can do our full processing
-        outevent.barshit.push_back(barseen);
-        coupledhits++;
+        coupledhits++; //this hit is considered coupled now.
 
         //figure out top/bottom pmt ID confirmation
         //h,j -> t,b
@@ -88,14 +89,15 @@ namespace eventutils{
         int b = j;
         int b_chip = j_chip;
         int b_chan = j_chan;
+        //This relabeling is JUST for the sake of readability
 
         double topgain,botgain,Atop,Abot,Btop,Bbot;
         topgain = texneut.get_gainfactors(barseen,0);
         botgain = texneut.get_gainfactors(barseen,1);
-        Atop = (double)outevent.Aint[t]*topgain-texneut.get_offset(t_chip,t_chan,0);
-        Abot = (double)outevent.Aint[b]*botgain-texneut.get_offset(b_chip,b_chan,1);
-        Btop = (double)outevent.Bint[t]*topgain-texneut.get_offset(t_chip,t_chan,1);
-        Bbot = (double)outevent.Bint[t]*botgain-texneut.get_offset(b_chip,b_chan,0);
+        Atop = (double)outevent.Aint[t];//*topgain;//-texneut.get_offset(t_chip,t_chan,0);
+        Abot = (double)outevent.Aint[b];//*botgain;//-texneut.get_offset(b_chip,b_chan,1);
+        Btop = (double)outevent.Bint[t];//*topgain;//-texneut.get_offset(t_chip,t_chan,1);
+        Bbot = (double)outevent.Bint[t];//*botgain;//-texneut.get_offset(b_chip,b_chan,0);
 
         outevent.barshit.push_back(barseen);
 
@@ -155,6 +157,50 @@ namespace eventutils{
 
     //only keep the event if we can successfully process it and things look good
     outevent.keep=true;
+    return outevent;
+  }
+
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+  analysed_event analyse_event(processed_event inevent){
+    analysed_event outevent;
+    outevent.timestamp = inevent.timestamp;
+    outevent.coupledhits = inevent.coupledhits;
+    outevent.barshit = std::move(inevent.barshit);
+    outevent.chip_top = std::move(inevent.chip_top);
+    outevent.chip_bot = std::move(inevent.chip_bot);
+    outevent.chan_top = std::move(inevent.chan_top);
+    outevent.chan_bot = std::move(inevent.chan_bot);
+    outevent.Aint_top = std::move(inevent.Aint_top);
+    outevent.Aint_bot = std::move(inevent.Aint_bot);
+    outevent.Bint_top = std::move(inevent.Bint_top);
+    outevent.Bint_bot = std::move(inevent.Bint_bot);
+    outevent.Cint_top = std::move(inevent.Cint_top);
+    outevent.Cint_bot = std::move(inevent.Cint_bot);
+    outevent.Tint_top = std::move(inevent.Tint_top);
+    outevent.Tint_bot = std::move(inevent.Tint_bot);
+
+    //Now we need to calculate the PSD
+    for (int h=0;h<outevent.coupledhits;h++){
+      double PSDvaltop = 1.-((double)(outevent.Bint_top[h])/(double)(outevent.Aint_top[h]));
+      double PSDvalbot = 1.-((double)(outevent.Bint_bot[h])/(double)(outevent.Aint_bot[h]));
+      double PSDval = 1.-(((double)outevent.Bint_top[h]+(double)outevent.Bint_bot[h])/
+                          ((double)outevent.Aint_top[h]+(double)outevent.Aint_bot[h]));
+
+      outevent.PSDtop.push_back(PSDvaltop);
+      outevent.PSDbot.push_back(PSDvalbot);
+      outevent.PSD.push_back(PSDval);
+      
+      //stuff to work on later
+      outevent.xhit.push_back(0.);
+      outevent.yhit.push_back(0.);
+      outevent.zhit.push_back(0.);
+      outevent.rho.push_back(0.);
+      outevent.theta.push_back(0.);
+      outevent.phi.push_back(0.);
+      outevent.E_calc.push_back(0.);  
+    }
+
     return outevent;
   }
 }

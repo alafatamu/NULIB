@@ -1,7 +1,6 @@
 #include "io/baseroot.hpp"
 #include "io/evthandler.hpp"
 #include "analysis/eventutils.hpp"
-#include "analysis/analysis.hpp"
 #include "proggy/tformat.hpp"
 #include "io/treebiz.hpp"
 #include "TTree.h"
@@ -27,7 +26,7 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detecto
   treebiz::PTreeData PData;
   treebiz::init_PTree(PTree, PData);
 
-  TTree ATree("analysis", "Analysis event data");
+  TTree ATree("analysed", "Analysed event data");
   treebiz::ATreeData AData;
   treebiz::init_ATree(ATree, AData);
 
@@ -49,8 +48,8 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detecto
         goodcount++;
         treebiz::fill_PTreeData(PData, processedevent);
         PTree.Fill();
-        analysis_feed AFeed = Analyse(processedevent, texneut);
-        treebiz::fill_ATreeData(AData, AFeed);
+        analysed_event analysedevent = eventutils::analyse_event(processedevent);
+        treebiz::fill_ATreeData(AData, analysedevent);
         ATree.Fill();
       }else continue;
     }else if(rawevent.unpackflag==2||rawevent.unpackflag==3) stillreading = false;

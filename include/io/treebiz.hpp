@@ -2,7 +2,6 @@
 
 #include "io/treebiz.hpp"
 #include "analysis/eventutils.hpp"
-#include "analysis/analysis.hpp"
 #include "TTree.h"
 
 #include <vector>
@@ -50,12 +49,18 @@ namespace treebiz{
   struct ATreeData{ //analysis data tree
     long long int timestamp = 0;
     int coupledhits = 0;
-    std::vector<double> E_top, E_bot; //energy in top, bottom PMT
-    std::vector<double> E_tot; //Total energy (top+bottom PMT)
+    std::vector<int> barshit;
+    std::vector<int> chip_top,chip_bot;
+    std::vector<int> chan_top,chan_bot;
+    std::vector<int> Aint_top,Aint_bot;
+    std::vector<int> Bint_top,Bint_bot;
+    std::vector<int> Cint_top,Cint_bot;
+    std::vector<int> Tint_top,Tint_bot;
+
     std::vector<double> PSD_top, PSD_bot, PSD;
-    std::vector<int> PSDflag;
     std::vector<double> xhit, yhit, zhit; //hit location 
     std::vector<double> rho, theta, phi;
+    std::vector<double> E_calc; //Total energy (top+bottom PMT)
   };
 
   //TREE DATA READ STRUCTS
@@ -109,19 +114,31 @@ namespace treebiz{
   struct ATreeReadData{
     long long int timestamp = 0;
     int coupledhits = 0;
-    std::vector<double>* E_top = nullptr; //energy in PMTs
-    std::vector<double>* E_bot = nullptr;
-    std::vector<double>* E_tot = nullptr; //Total energy (top+bottom PMT)
+    std::vector<int>* barshit = nullptr;
+    std::vector<int>* chip_top = nullptr;
+    std::vector<int>* chip_bot = nullptr;
+    std::vector<int>* chan_top = nullptr;
+    std::vector<int>* chan_bot = nullptr;
+    std::vector<int>* Aint_top = nullptr;
+    std::vector<int>* Aint_bot = nullptr;
+    std::vector<int>* Bint_top = nullptr;
+    std::vector<int>* Bint_bot = nullptr;
+    std::vector<int>* Cint_top = nullptr;
+    std::vector<int>* Cint_bot = nullptr;
+    std::vector<int>* Tint_top = nullptr;
+    std::vector<int>* Tint_bot = nullptr;
+
     std::vector<double>* PSD_top = nullptr;
     std::vector<double>* PSD_bot = nullptr;
     std::vector<double>* PSD = nullptr;
-    std::vector<int>* PSDflag = nullptr;
-    std::vector<double>* xhit = nullptr; //hit location
+    
+    std::vector<double>* xhit = nullptr;
     std::vector<double>* yhit = nullptr;
     std::vector<double>* zhit = nullptr;
     std::vector<double>* rho = nullptr;
     std::vector<double>* theta = nullptr;
     std::vector<double>* phi = nullptr;
+    std::vector<double>* E_calc = nullptr;
   };
   
   void init_RTree(TTree&, treebiz::RTreeData&);
@@ -130,7 +147,7 @@ namespace treebiz{
 
   void fill_RTreeData(treebiz::RTreeData&, eventutils::raw_event&);
   void fill_PTreeData(treebiz::PTreeData&, eventutils::processed_event&);
-  void fill_ATreeData(treebiz::ATreeData&, analysis_feed&);
+  void fill_ATreeData(treebiz::ATreeData&, eventutils::analysed_event&);
 
   void set_RTreeBranches(TTree&, treebiz::RTreeReadData&);
   void set_PTreeBranches(TTree&, treebiz::PTreeReadData&);

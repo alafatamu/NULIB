@@ -35,6 +35,7 @@ int main(){
     std::cout<<"Dumping histograms to "<<HDumpName<<std::endl;
     base_histos(OutputROOTFileName, HDumpName); //dump the histograms
     proc_histos(OutputROOTFileName, HDumpName); //dump the histograms
+    calc_histos(OutputROOTFileName, HDumpName); //dump the histograms
   }
 
   std::cout<<"Done!"<<std::endl;

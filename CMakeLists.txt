@@ -11,7 +11,6 @@ find_package(ROOT REQUIRED COMPONENTS Tree RIO)
 add_library(core
     src/analysis/eventutils.cpp
     src/analysis/detector.cpp
-    src/analysis/analysis.cpp
     src/analysis/histos.cpp
     src/io/treebiz.cpp
     src/io/evthandler.cpp

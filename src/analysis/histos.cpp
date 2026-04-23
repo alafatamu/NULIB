@@ -9,6 +9,7 @@
 #include "TTree.h"
 #include "TString.h"
 #include "TH1F.h"
+#include "TH2F.h"
 
 using namespace tformat;
 
@@ -94,7 +95,8 @@ void base_histos(std::string DataFileName, std::string HDumpName){ //open a root
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root file and make histograms based on the "raw" tree
+void proc_histos(std::string DataFileName, std::string HDumpName){ 
+  //open a root file and make histograms based on the "processed" tree
   TFile DataFile(DataFileName.c_str(), "READ");
   if(DataFile.IsZombie()){
     std::cout<<"Error: could not open "<<DataFileName<<std::endl;
@@ -120,7 +122,8 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
   P_dir = HDump.mkdir("PROCESSED"); //make new directories
   TDirectory* P_dirtop = HDump.mkdir("PROCESSED/top", "top");
   TDirectory* P_dirbot = HDump.mkdir("PROCESSED/bottom", "bottom");
-  if(P_dir==nullptr||P_dirtop==nullptr||P_dirbot==nullptr){
+  TDirectory* P_overview = HDump.mkdir("PROCESSED/overview", "overview");
+  if(P_dir==nullptr||P_dirtop==nullptr||P_dirbot==nullptr||P_overview==nullptr){
     std::cout<<RED<<"Error: could not make Processed directory in histos.root"<<RESET<<std::endl;
     return;
   }
@@ -134,27 +137,27 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
 
   TH1F* chip_h = new TH1F("chip", "chip", 16, 0, 16);
   TH1F* chan_h = new TH1F("chan", "chan", 8, 0, 8);
-  TH1F* Aint_h = new TH1F("Aint", "Aint", 1250, 0, 3500);
-  TH1F* Bint_h = new TH1F("Bint", "Bint", 1250, 0, 3500);
-  TH1F* Cint_h = new TH1F("Cint", "Cint", 1250, 0, 3500);
+  TH1F* Aint_h = new TH1F("Aint", "Aint", 1750, 0, 3500);
+  TH1F* Bint_h = new TH1F("Bint", "Bint", 1750, 0, 3500);
+  TH1F* Cint_h = new TH1F("Cint", "Cint", 1750, 0, 3500);
   TH1F* Tint_h = new TH1F("Tint", "Tint", 2000, 0, 8000);
   TH1F* TDCchan_h = new TH1F("TDCchan", "TDCchan", 16, 0, 16);
   TH1F* TDCval_h = new TH1F("TDCval", "TDCval", 2500, 0, 5000);
 
   TH1F* chip_top_h = new TH1F("chip_top", "chip_top", 16, 0, 16);
   TH1F* chan_top_h = new TH1F("chan_top", "chan_top", 8, 0, 8);
-  TH1F* Aint_top_h = new TH1F("Aint_top", "Aint_top", 1250, 0, 3500);
-  TH1F* Bint_top_h = new TH1F("Bint_top", "Bint_top", 1250, 0, 3500);
-  TH1F* Cint_top_h = new TH1F("Cint_top", "Cint_top", 1250, 0, 3500);
+  TH1F* Aint_top_h = new TH1F("Aint_top", "Aint_top", 1750, 0, 3500);
+  TH1F* Bint_top_h = new TH1F("Bint_top", "Bint_top", 1750, 0, 3500);
+  TH1F* Cint_top_h = new TH1F("Cint_top", "Cint_top", 1750, 0, 3500);
   TH1F* Tint_top_h = new TH1F("Tint_top", "Tint_top", 2000, 0, 8000);
   //TH1F* TDCchan_top_h = new TH1F("TDCchan_top", "TDCchan_top", 16, 0, 16);
   //TH1F* TDCval_top_h = new TH1F("TDCval_top", "TDCval_top", 2500, 0, 5000);
 
   TH1F* chip_bot_h = new TH1F("chip_bot", "chip_bot", 16, 0, 16);
   TH1F* chan_bot_h = new TH1F("chan_bot", "chan_bot", 8, 0, 8);
-  TH1F* Aint_bot_h = new TH1F("Aint_bot", "Aint_bot", 1250, 0, 3500);
-  TH1F* Bint_bot_h = new TH1F("Bint_bot", "Bint_bot", 1250, 0, 3500);
-  TH1F* Cint_bot_h = new TH1F("Cint_bot", "Cint_bot", 1250, 0, 3500);
+  TH1F* Aint_bot_h = new TH1F("Aint_bot", "Aint_bot", 1750, 0, 3500);
+  TH1F* Bint_bot_h = new TH1F("Bint_bot", "Bint_bot", 1750, 0, 3500);
+  TH1F* Cint_bot_h = new TH1F("Cint_bot", "Cint_bot", 1750, 0, 3500);
   TH1F* Tint_bot_h = new TH1F("Tint_bot", "Tint_bot", 2000, 0, 8000);
   //TH1F* TDCchan_bot_h = new TH1F("TDCchan_bot", "TDCchan_bot", 16, 0, 16);
   //TH1F* TDCval_bot_h = new TH1F("TDCval_bot", "TDCval_bot", 2500, 0, 5000);
@@ -162,6 +165,11 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
   TH1F* barshit_h = new TH1F("barshit", "barshit", 128, 0, 128);
   TH1F* coupledhits_h = new TH1F("coupledhits", "coupledhits", 5, 0, 5);
   TH1F* barmult_h = new TH1F("barmult", "barmult", 5, 0, 5);
+
+  //some overview histograms
+  TH2F* AvB_h = new TH2F("AvB", "Aint vs Bint", 1750, 0, 3500, 1750, 0, 3500);
+  TH2F* AvBtop_h = new TH2F("AvBtop", "Aint_top vs Bint_top", 1750, 0, 3500, 1750, 0, 3500);
+  TH2F* AvBbot_h = new TH2F("AvBbot", "Aint_bot vs Bint_bot", 1750, 0, 3500, 1750, 0, 3500);
 
   //loop through each event and fill the histograms
   for(int i=0; i<PTree->GetEntries(); i++){
@@ -175,6 +183,8 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
       Bint_h->Fill((*PData.Bint)[j]);
       Cint_h->Fill((*PData.Cint)[j]);
       Tint_h->Fill((*PData.Tint)[j]);
+
+      AvB_h->Fill((*PData.Aint)[j], (*PData.Bint)[j]);
     }
 
     for(int j=0; j<PData.coupledhits; j++){
@@ -191,6 +201,9 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
       Bint_bot_h->Fill((*PData.Bint_bot)[j]);
       Cint_bot_h->Fill((*PData.Cint_bot)[j]);
       Tint_bot_h->Fill((*PData.Tint_bot)[j]);
+
+      AvBtop_h->Fill((*PData.Aint_top)[j], (*PData.Bint_top)[j]);
+      AvBbot_h->Fill((*PData.Aint_bot)[j], (*PData.Bint_bot)[j]);
     }
     
     //std::cout<<"TDC data size: "<<(*PData.TDCchan).size()<<std::endl;
@@ -250,9 +263,73 @@ void proc_histos(std::string DataFileName, std::string HDumpName){ //open a root
   //TDCchan_bot_h->Write();
   //TDCval_bot_h->Write();
 
+  P_overview->cd();
+  AvB_h->Write();
+
   std::cout<<"Processed histograms saved..."<<std::endl;
 
   return;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void calc_histos(std::string DataFileName, std::string HDumpName){ 
+  //Open a root file and make histograms based on the "analysed" tree
+  TFile DataFile(DataFileName.c_str(), "READ");
+  if(DataFile.IsZombie()){
+    std::cout<<"Error: could not open "<<DataFileName<<std::endl;
+    return;
+  }
+
+  TFile HDump(HDumpName.c_str(),"UPDATE");
+  if(HDump.IsZombie()){
+    std::cout<<"Error: could not open histos.root"<<std::endl;
+    return;
+  }
+
+  TTree* ATree = nullptr;
+  DataFile.GetObject("analysed", ATree);
+  if(ATree==nullptr){
+    std::cout<<"Error: could not find processed tree in histos.root"<<std::endl;
+    return;
+  }
+
+  TDirectory* A_dir = HDump.GetDirectory("ANALYSED"); //check for the directories
+  if(A_dir) HDump.rmdir("ANALYSED");  //delete the directory if it already exists
+  A_dir = HDump.mkdir("ANALYSED"); //make new directories
+  if(A_dir==nullptr){
+    std::cout<<RED<<"Error: could not make Analysed directory in histos.root"<<RESET<<std::endl;
+    return;
+  }
+
+  //Make the tree variables, then set the branch addresses
+  treebiz::ATreeReadData AData;
+  treebiz::set_ATreeBranches(*ATree, AData);
+
+  //Make the histograms
+  TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
+  TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
+  TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
+
+  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 400, -2, 2, 1750, 0, 3500);
+  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 400, -2, 2, 1750, 0, 3500);
+  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 400, -2, 2, 1750, 0, 3500);
+
+  //loop through each event and fill the histograms
+  for(int i=0; i<ATree->GetEntries(); i++){
+    ATree->GetEntry(i);
+    for (int h=0;h<AData.coupledhits;h++){
+      PSD->Fill((*AData.PSD)[h]);
+      PSDtop->Fill((*AData.PSD_top)[h]);
+      PSDbot->Fill((*AData.PSD_bot)[h]);
+    }
+  }
+
+  A_dir->cd();
+  PSD->Write();
+  PSDtop->Write();
+  PSDbot->Write();
+
+  std::cout<<"Analysed histograms saved..."<<std::endl;
+  return;
+}
