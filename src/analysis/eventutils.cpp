@@ -97,7 +97,7 @@ namespace eventutils{
         Atop = (double)outevent.Aint[t];//*topgain;//-texneut.get_offset(t_chip,t_chan,0);
         Abot = (double)outevent.Aint[b];//*botgain;//-texneut.get_offset(b_chip,b_chan,1);
         Btop = (double)outevent.Bint[t];//*topgain;//-texneut.get_offset(t_chip,t_chan,1);
-        Bbot = (double)outevent.Bint[t];//*botgain;//-texneut.get_offset(b_chip,b_chan,0);
+        Bbot = (double)outevent.Bint[b];//*botgain;//-texneut.get_offset(b_chip,b_chan,0);
 
         outevent.barshit.push_back(barseen);
 
