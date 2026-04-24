@@ -43,3 +43,11 @@ add_executable(processor
 )
 
 target_link_libraries(processor PRIVATE core)
+###########################################
+add_executable(plotter
+    apps/rootplotter.cc
+)
+
+target_link_libraries(plotter PRIVATE core)
+
+###########################################

@@ -224,6 +224,19 @@ namespace treebiz{
     tree.SetBranchAddress("timestamp", &AData.timestamp);
     tree.SetBranchAddress("coupledhits", &AData.coupledhits);
     tree.SetBranchAddress("barshit", &AData.barshit);
+    
+    tree.SetBranchAddress("chip_top", &AData.chip_top);
+    tree.SetBranchAddress("chip_bot", &AData.chip_bot);
+    tree.SetBranchAddress("chan_top", &AData.chan_top);
+    tree.SetBranchAddress("chan_bot", &AData.chan_bot);
+    tree.SetBranchAddress("Aint_top", &AData.Aint_top);
+    tree.SetBranchAddress("Aint_bot", &AData.Aint_bot);
+    tree.SetBranchAddress("Bint_top", &AData.Bint_top);
+    tree.SetBranchAddress("Bint_bot", &AData.Bint_bot);
+    tree.SetBranchAddress("Cint_top", &AData.Cint_top);
+    tree.SetBranchAddress("Cint_bot", &AData.Cint_bot);
+    tree.SetBranchAddress("Tint_top", &AData.Tint_top);
+    tree.SetBranchAddress("Tint_bot", &AData.Tint_bot);
 
     tree.SetBranchAddress("PSD_top", &AData.PSD_top);
     tree.SetBranchAddress("PSD_bot", &AData.PSD_bot);

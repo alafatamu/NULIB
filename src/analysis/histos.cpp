@@ -311,9 +311,11 @@ void calc_histos(std::string DataFileName, std::string HDumpName){
   TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
   TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
 
-  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 400, -2, 2, 1750, 0, 3500);
-  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 400, -2, 2, 1750, 0, 3500);
-  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 400, -2, 2, 1750, 0, 3500);
+  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 875, 0, 3500, 100, 0, 1);
+  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 875, 0, 3500, 100, 0, 1);
+  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 875, 0, 3500, 100, 0, 1);
+
+  TH2F* PSDvT = new TH2F("PSDvT", "PSDvT", 1000, -500, 500, 100, 0, 1);
 
   //loop through each event and fill the histograms
   for(int i=0; i<ATree->GetEntries(); i++){
@@ -322,6 +324,14 @@ void calc_histos(std::string DataFileName, std::string HDumpName){
       PSD->Fill((*AData.PSD)[h]);
       PSDtop->Fill((*AData.PSD_top)[h]);
       PSDbot->Fill((*AData.PSD_bot)[h]);
+
+      double EfromC = (double)(*AData.Cint_top)[h]+(double)(*AData.Cint_bot)[h];
+      PSDvC->Fill(EfromC,(*AData.PSD)[h]);
+      PSDtopC->Fill(EfromC,(*AData.PSD_top)[h]);
+      PSDbotC->Fill(EfromC,(*AData.PSD_bot)[h]);
+
+      double Tavg = ((double)(*AData.Tint_top)[h]+(double)(*AData.Tint_bot)[h])/2.;
+      PSDvT->Fill(Tavg,(*AData.PSD)[h]);
     }
   }
 
@@ -330,6 +340,12 @@ void calc_histos(std::string DataFileName, std::string HDumpName){
   PSDtop->Write();
   PSDbot->Write();
 
+  PSDvC->Write();
+  PSDtopC->Write();
+  PSDbotC->Write();
+
+  PSDvT->Write();
+  
   std::cout<<"Analysed histograms saved..."<<std::endl;
   return;
 }
