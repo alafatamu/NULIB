@@ -44,11 +44,11 @@ add_executable(eproc
 
 target_link_libraries(eproc PRIVATE core)
 ###########################################
-add_executable(plot
-    apps/plot.cc
+add_executable(eplot
+    apps/eplot.cc
 )
 
-target_link_libraries(plot PRIVATE core)
+target_link_libraries(eplot PRIVATE core)
 
 ###########################################
 add_executable(setproc
@@ -56,5 +56,12 @@ add_executable(setproc
 )
 
 target_link_libraries(setproc PRIVATE core)
+
+###########################################
+add_executable(setplot
+    apps/setplot.cc
+)
+
+target_link_libraries(setplot PRIVATE core)
 
 ###########################################

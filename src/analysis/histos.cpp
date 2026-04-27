@@ -15,34 +15,30 @@ using namespace tformat;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void base_histos(std::string DataFileName, std::string HDumpName){ //open a root file and make histograms based on the "raw" tree, barreq is the barcode to plot
-  TFile DataFile(DataFileName.c_str(), "READ");
-  if(DataFile.IsZombie()){
-    std::cout<<"Error: could not open "<<DataFileName<<std::endl;
-    return;
-  }
+void base_histos(TFile& DataFile, TFile& HDump, int runreq){ //upgrade idea: take a single tree, not a file
+  //open a root file and make histograms based on the "raw" tree
 
-  TFile HDump(HDumpName.c_str(),"UPDATE");
-  if(HDump.IsZombie()){
-    std::cout<<"Error: could not open histos.root"<<std::endl;
-    return;
+  //First, let's build our base directories
+  TDirectory* inputbase = &DataFile;
+  TDirectory* outputbase = &HDump;
+  if(runreq!=-10){
+    inputbase = DataFile.GetDirectory(Form("run%d",runreq));
+    outputbase = HDump.GetDirectory(Form("run%d",runreq));
+    if(!outputbase) outputbase = HDump.mkdir(Form("run%d",runreq));
   }
+  if(!inputbase){std::cout<<RED<<"Error: could not find data directory"<<RESET<<std::endl;return;}
+  if(!outputbase){std::cout<<RED<<"Error: could not find output directory"<<RESET<<std::endl;return;}
 
+  //Now we can get our data of interest
   TTree* RTree = nullptr;
-  DataFile.GetObject("raw", RTree);
-  if(RTree==nullptr){
-    std::cout<<"Error: could not find raw tree in histos.root"<<std::endl;
-    return;
-  }
+  inputbase->GetObject("raw", RTree);
+  if(RTree==nullptr){std::cout<<"Error: could not find raw tree in histos.root"<<std::endl;return;}
 
-  //Now that we have our data, let's make a new directory in HDump
-  TDirectory* R_dir = HDump.GetDirectory("RAW"); //check for the directory
-  if(R_dir) HDump.rmdir("RAW"); //delete the directory if it already exists
-  R_dir = HDump.mkdir("RAW"); //make a new directory
-  if(R_dir==nullptr){
-    std::cout<<RED<<"Error: could not make RData directory in histos.root"<<RESET<<std::endl;
-    return;
-  }
+  //Finally, let's make the new directory in HDump
+  TDirectory* R_Dir = outputbase->GetDirectory("RAW"); //check for the directory
+  if(R_Dir) HDump.rmdir("RAW"); //delete the directory (and its contents) if it already exists
+  R_Dir = outputbase->mkdir("RAW"); //make the new directory
+  if(R_Dir==nullptr){std::cout<<RED<<"Error: could not make raw directory in HDump"<<RESET<<std::endl;return;}
 
   //Make the tree variables, then set the branch addresses
   treebiz::RTreeReadData RData;
@@ -77,7 +73,7 @@ void base_histos(std::string DataFileName, std::string HDumpName){ //open a root
     }
   }
 
-  R_dir->cd();
+  R_Dir->cd();
   hitcount_h->Write();
   chip_h->Write();
   chan_h->Write();
@@ -95,36 +91,36 @@ void base_histos(std::string DataFileName, std::string HDumpName){ //open a root
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void proc_histos(std::string DataFileName, std::string HDumpName){ 
+void proc_histos(TFile& DataFile, TFile& HDump, int runreq){ 
   //open a root file and make histograms based on the "processed" tree
-  TFile DataFile(DataFileName.c_str(), "READ");
-  if(DataFile.IsZombie()){
-    std::cout<<"Error: could not open "<<DataFileName<<std::endl;
-    return;
+  
+  //First, let's build our base directories
+  TDirectory* inputbase = &DataFile;
+  TDirectory* outputbase = &HDump;
+  if(runreq!=-10){
+    inputbase = DataFile.GetDirectory(Form("run%d",runreq));
+    outputbase = HDump.GetDirectory(Form("run%d",runreq));
+    if(!outputbase) outputbase = HDump.mkdir(Form("run%d",runreq));
   }
+  if(!inputbase){std::cout<<RED<<"Error: could not find data directory"<<RESET<<std::endl;return;}
+  if(!outputbase){std::cout<<RED<<"Error: could not find output directory"<<RESET<<std::endl;return;}
 
-  TFile HDump(HDumpName.c_str(),"UPDATE");
-  if(HDump.IsZombie()){
-    std::cout<<"Error: could not open histos.root"<<std::endl;
-    return;
-  }
-
+  //Now we can get our data of interest
   TTree* PTree = nullptr;
-  DataFile.GetObject("processed", PTree);
-  if(PTree==nullptr){
-    std::cout<<"Error: could not find processed tree in histos.root"<<std::endl;
-    return;
-  }
+  inputbase->GetObject("processed", PTree);
+  if(PTree==nullptr){std::cout<<"Error: could not find processed tree in histos.root"<<std::endl;return;}
 
-  //Now that we have our data, let's make a new directory in HDump
-  TDirectory* P_dir = HDump.GetDirectory("PROCESSED"); //check for the directories
-  if(P_dir) HDump.rmdir("PROCESSED");  //delete the directory if it already exists
-  P_dir = HDump.mkdir("PROCESSED"); //make new directories
-  TDirectory* P_dirtop = HDump.mkdir("PROCESSED/top", "top");
-  TDirectory* P_dirbot = HDump.mkdir("PROCESSED/bottom", "bottom");
-  TDirectory* P_overview = HDump.mkdir("PROCESSED/overview", "overview");
-  if(P_dir==nullptr||P_dirtop==nullptr||P_dirbot==nullptr||P_overview==nullptr){
-    std::cout<<RED<<"Error: could not make Processed directory in histos.root"<<RESET<<std::endl;
+  //Finally, let's make the new directories in HDump
+  TDirectory* P_Dir = outputbase->GetDirectory("PROCESSED"); //check for the directory
+  if(P_Dir) HDump.rmdir("PROCESSED"); //delete the directory (and its contents) if it already exists
+  P_Dir = outputbase->mkdir("PROCESSED"); //make the new directory
+  if(P_Dir==nullptr){std::cout<<RED<<"Error: could not make PROCESSED directory in HDump"<<RESET<<std::endl;return;}
+  //And make the subdirectories
+  TDirectory* P_DirTop = P_Dir->mkdir("top"); //make the top directory
+  TDirectory* P_DirBot = P_Dir->mkdir("bottom"); //make the bottom directory
+  TDirectory* P_DirOverview = P_Dir->mkdir("overview"); //make the overview directory
+  if(P_Dir==nullptr||P_DirTop==nullptr||P_DirBot==nullptr||P_DirOverview==nullptr){
+    std::cout<<RED<<"Error: could not make processed subdirectories in histos.root"<<RESET<<std::endl;
     return;
   }
 
@@ -229,7 +225,7 @@ void proc_histos(std::string DataFileName, std::string HDumpName){
     barmult_h->Fill(PData.barmult);
   }
 
-  P_dir->cd();
+  P_Dir->cd();
   hitcount_h->Write();
   chip_h->Write();
   chan_h->Write();
@@ -243,7 +239,7 @@ void proc_histos(std::string DataFileName, std::string HDumpName){
   coupledhits_h->Write();
   barmult_h->Write();
 
-  P_dirtop->cd();
+  P_DirTop->cd();
   chip_top_h->Write();
   chan_top_h->Write();
   Aint_top_h->Write();
@@ -253,7 +249,7 @@ void proc_histos(std::string DataFileName, std::string HDumpName){
   //TDCchan_top_h->Write();
   //TDCval_top_h->Write();
 
-  P_dirbot->cd();
+  P_DirBot->cd();
   chip_bot_h->Write();
   chan_bot_h->Write();
   Aint_bot_h->Write();
@@ -263,7 +259,7 @@ void proc_histos(std::string DataFileName, std::string HDumpName){
   //TDCchan_bot_h->Write();
   //TDCval_bot_h->Write();
 
-  P_overview->cd();
+  P_DirOverview->cd();
   AvB_h->Write();
 
   std::cout<<"Processed histograms saved..."<<std::endl;
@@ -273,34 +269,30 @@ void proc_histos(std::string DataFileName, std::string HDumpName){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void calc_histos(std::string DataFileName, std::string HDumpName, int barreq = 1234){ 
-  //Open a root file and make histograms based on the "analysed" tree
-  TFile DataFile(DataFileName.c_str(), "READ");
-  if(DataFile.IsZombie()){
-    std::cout<<"Error: could not open "<<DataFileName<<std::endl;
-    return;
+void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){ 
+  //open a root file and make histograms based on the "analysed" tree
+  
+  //First, let's build our base directories
+  TDirectory* inputbase = &DataFile;
+  TDirectory* outputbase = &HDump;
+  if(runreq!=-10){
+    inputbase = DataFile.GetDirectory(Form("run%d",runreq));
+    outputbase = HDump.GetDirectory(Form("run%d",runreq));
+    if(!outputbase) outputbase = HDump.mkdir(Form("run%d",runreq));
   }
+  if(!inputbase){std::cout<<RED<<"Error: could not find data directory"<<RESET<<std::endl;return;}
+  if(!outputbase){std::cout<<RED<<"Error: could not find output directory"<<RESET<<std::endl;return;}
 
-  TFile HDump(HDumpName.c_str(),"UPDATE");
-  if(HDump.IsZombie()){
-    std::cout<<"Error: could not open histos.root"<<std::endl;
-    return;
-  }
-
+  //Now we can get our data of interest
   TTree* ATree = nullptr;
-  DataFile.GetObject("analysed", ATree);
-  if(ATree==nullptr){
-    std::cout<<"Error: could not find processed tree in histos.root"<<std::endl;
-    return;
-  }
+  inputbase->GetObject("analysed", ATree);
+  if(ATree==nullptr){std::cout<<"Error: could not find analysed tree in histos.root"<<std::endl;return;}
 
-  TDirectory* A_dir = HDump.GetDirectory("ANALYSED"); //check for the directories
-  if(A_dir) HDump.rmdir("ANALYSED");  //delete the directory if it already exists
-  A_dir = HDump.mkdir("ANALYSED"); //make new directories
-  if(A_dir==nullptr){
-    std::cout<<RED<<"Error: could not make Analysed directory in histos.root"<<RESET<<std::endl;
-    return;
-  }
+  //Finally, let's make the new directory in HDump
+  TDirectory* A_Dir = outputbase->GetDirectory("ANALYSED"); //check for the directory
+  if(A_Dir) HDump.rmdir("ANALYSED"); //delete the directory (and its contents) if it already exists
+  A_Dir = outputbase->mkdir("ANALYSED"); //make the new directory
+  if(A_Dir==nullptr){std::cout<<RED<<"Error: could not make ANALYSED directory in HDump"<<RESET<<std::endl;return;}
 
   //Make the tree variables, then set the branch addresses
   treebiz::ATreeReadData AData;
@@ -311,9 +303,9 @@ void calc_histos(std::string DataFileName, std::string HDumpName, int barreq = 1
   TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
   TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
 
-  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 500, 0, 5000, 100, 0, 1);
-  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 500, 0, 5000, 100, 0, 1);
-  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 500, 0, 5000, 100, 0, 1);
+  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 1000, 0, 10000, 100, 0, 1);
 
   TH2F* PSDvT = new TH2F("PSDvT", "PSDvT", 1000, 0, 4000, 100, 0, 1);
 
@@ -339,7 +331,7 @@ void calc_histos(std::string DataFileName, std::string HDumpName, int barreq = 1
     }
   }
 
-  A_dir->cd();
+  A_Dir->cd();
   PSD->Write();
   PSDtop->Write();
   PSDbot->Write();
