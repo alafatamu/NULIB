@@ -6,6 +6,8 @@
 #include "analysis/detector.hpp"
 #include "analysis/histos.hpp"
 
+#include "TFile.h"
+
 using namespace tformat;
 
 int main(){
@@ -22,20 +24,23 @@ int main(){
 
   std::string InputEvtName = namebuilder::get_InputEvtName(cfg, runreq); //generate an input file name
   std::ifstream InputEvtFile = grabfile(InputEvtName); //open the input file
-  if(!InputEvtFile) return 0; //no file loaded
+  if(!InputEvtFile){
+    std::cout<<RED<<"Error: could not open evt file"<<RESET<<std::endl;
+    return 0;
+  }
 
   std::string OutputROOTFileName = namebuilder::get_OutputROOTName(cfg, runreq); //generate an output file name
+  TFile OutputROOTFile(OutputROOTFileName.c_str(), "RECREATE");
+  if(OutputROOTFile.IsZombie()){
+    std::cout<<RED<<"Error: could not open ROOT file"<<RESET<<std::endl;
+    return 0;
+  }
 
-  int result = Evt_to_ROOT(InputEvtFile, OutputROOTFileName, texneut); //read through the file
+  int result = Evt_to_ROOT(InputEvtFile, OutputROOTFile, texneut); //read through the file
   if(result==0){
     std::cout<<RED<<"Run "<<runreq<<" read failed."<<RESET<<std::endl;
   }else if(result==1){
     std::cout<<GREEN<<"Run "<<runreq<<" successfully read."<<RESET<<std::endl;
-    std::string HDumpName = namebuilder::get_OutputROOTName(cfg, runreq, "_histos"); //generate a histos file name
-    std::cout<<"Dumping histograms to "<<HDumpName<<std::endl;
-    base_histos(OutputROOTFileName, HDumpName); //dump the histograms
-    proc_histos(OutputROOTFileName, HDumpName); //dump the histograms
-    calc_histos(OutputROOTFileName, HDumpName, 1234); //dump the histograms
   }
 
   std::cout<<"Done!"<<std::endl;

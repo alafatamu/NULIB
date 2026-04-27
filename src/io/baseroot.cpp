@@ -5,6 +5,7 @@
 #include "io/treebiz.hpp"
 #include "TTree.h"
 #include "TFile.h"
+#include "TString.h"
 
 #include <iostream>
 #include <fstream>
@@ -15,9 +16,22 @@ using namespace tformat;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detector texneut){
-  TFile ROOTOutputFile(outputfilename.c_str(), "RECREATE");
+int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector texneut, int runid){
+  TDirectory* run_dir = nullptr;
+  if(runid!=-10){ //-10 is the default 
+                  //ideally, the user will include the runID in the file name if they don't specify the run in the function call
+    TString run_dir_name = Form("run%d",runid);
+    run_dir = ROOTOutputFile.GetDirectory(run_dir_name); //check for the directory
+    if(run_dir) ROOTOutputFile.rmdir(run_dir_name);  //delete the directory if it already exists
+    run_dir = ROOTOutputFile.mkdir(run_dir_name); //make new directory
+    run_dir->cd();//cd into the new directory
+    if(run_dir==nullptr){
+      std::cout<<RED<<"Error: could not make Analysed directory in histos.root"<<RESET<<std::endl;
+      return 0; //unsuccessful conversion
+    }
+  }
 
+  //now all of these trees should be in the correct directory regardless of the runid
   TTree RTree("raw", "Raw event data");
   treebiz::RTreeData RData;
   treebiz::init_RTree(RTree, RData);
@@ -65,7 +79,6 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, std::string outputfilename, detecto
   RTree.Write();
   PTree.Write();
   ATree.Write();
-  ROOTOutputFile.Close();
 
   std::cout<<"Done!"<<std::endl;
 

@@ -31,23 +31,30 @@ target_link_libraries(core PUBLIC
 )
 
 ###########################################
-add_executable(sifter
-    apps/evtsifter.cc
+add_executable(view
+    apps/view.cc
 )
 
-target_link_libraries(sifter PRIVATE core)
+target_link_libraries(view PRIVATE core)
 
 ###########################################
-add_executable(processor
-    apps/evtprocessor.cc
+add_executable(eproc
+    apps/eproc.cc
 )
 
-target_link_libraries(processor PRIVATE core)
+target_link_libraries(eproc PRIVATE core)
 ###########################################
-add_executable(plotter
-    apps/rootplotter.cc
+add_executable(plot
+    apps/plot.cc
 )
 
-target_link_libraries(plotter PRIVATE core)
+target_link_libraries(plot PRIVATE core)
+
+###########################################
+add_executable(setproc
+    apps/setproc.cc
+)
+
+target_link_libraries(setproc PRIVATE core)
 
 ###########################################

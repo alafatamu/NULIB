@@ -10,4 +10,5 @@ namespace namebuilder{
   std::string get_InputEvtName(const INFOCON&, int);
   std::string get_InputROOTName(const INFOCON&, int, std::string modifier = "");
   std::string get_OutputROOTName(const INFOCON&, int, std::string modifier = "");
+  std::string get_OutputSETName(const INFOCON&, int, std::string modifier = "");
 };

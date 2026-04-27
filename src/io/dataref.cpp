@@ -30,4 +30,12 @@ namespace namebuilder{
     return outputfilename;
   }
 
+  std::string get_OutputSETName(const INFOCON& cfg, int setid, std::string modifier){
+    std::string outputfilename = cfg.OutputDir; //get the data directory
+    if(setid==1) outputfilename += "6hepn";
+    else if(setid==2) outputfilename += "9lipn";
+    outputfilename +=  modifier + ".root"; //add the runID to the filename
+    return outputfilename;
+  }
+
 };

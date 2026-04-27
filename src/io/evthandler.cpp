@@ -285,6 +285,7 @@ raw_event grab_event(std::ifstream& evtfile){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 std::ifstream grabfile(std::string filename){
+  std::cout<<std::endl;
   std::cout<<"Looking for "<<filename<<std::endl;
   std::ifstream evtfile(filename);
   if(!evtfile.is_open()){
