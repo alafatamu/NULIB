@@ -15,7 +15,7 @@ using namespace tformat;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void base_histos(std::string DataFileName, std::string HDumpName){ //open a root file and make histograms based on the "raw" tree
+void base_histos(std::string DataFileName, std::string HDumpName){ //open a root file and make histograms based on the "raw" tree, barreq is the barcode to plot
   TFile DataFile(DataFileName.c_str(), "READ");
   if(DataFile.IsZombie()){
     std::cout<<"Error: could not open "<<DataFileName<<std::endl;
@@ -273,7 +273,7 @@ void proc_histos(std::string DataFileName, std::string HDumpName){
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void calc_histos(std::string DataFileName, std::string HDumpName){ 
+void calc_histos(std::string DataFileName, std::string HDumpName, int barreq = 1234){ 
   //Open a root file and make histograms based on the "analysed" tree
   TFile DataFile(DataFileName.c_str(), "READ");
   if(DataFile.IsZombie()){
@@ -319,8 +319,12 @@ void calc_histos(std::string DataFileName, std::string HDumpName){
 
   //loop through each event and fill the histograms
   for(int i=0; i<ATree->GetEntries(); i++){
+    bool plot = false;
     ATree->GetEntry(i);
     for (int h=0;h<AData.coupledhits;h++){
+      if((*AData.barshit)[h]==barreq||barreq==1234) plot = true;
+      if(!plot)continue;
+
       PSD->Fill((*AData.PSD)[h]);
       PSDtop->Fill((*AData.PSD_top)[h]);
       PSDbot->Fill((*AData.PSD_bot)[h]);

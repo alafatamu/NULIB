@@ -77,6 +77,7 @@ namespace eventutils{
         if(texneut.getbar(h_chip,h_chan)!=texneut.getbar(j_chip,j_chan))continue; //confirm they are in the same bar
         int barseen=texneut.getbar(h_chip,h_chan); //store bar number in a variable for later use
         outevent.barshit.push_back(barseen); //record the bar number in the event object
+        
         used[h]=used[j]=true;//now we can do our full processing
         coupledhits++; //this hit is considered coupled now.
 
