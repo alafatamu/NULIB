@@ -311,11 +311,11 @@ void calc_histos(std::string DataFileName, std::string HDumpName){
   TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
   TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
 
-  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 875, 0, 3500, 100, 0, 1);
-  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 875, 0, 3500, 100, 0, 1);
-  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 875, 0, 3500, 100, 0, 1);
+  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 500, 0, 5000, 100, 0, 1);
+  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 500, 0, 5000, 100, 0, 1);
+  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 500, 0, 5000, 100, 0, 1);
 
-  TH2F* PSDvT = new TH2F("PSDvT", "PSDvT", 1000, -500, 500, 100, 0, 1);
+  TH2F* PSDvT = new TH2F("PSDvT", "PSDvT", 1000, 0, 4000, 100, 0, 1);
 
   //loop through each event and fill the histograms
   for(int i=0; i<ATree->GetEntries(); i++){
