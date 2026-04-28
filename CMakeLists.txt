@@ -38,3 +38,10 @@ add_executable(vpp
 target_link_libraries(vpp PRIVATE core)
 
 ###########################################
+add_executable(setplot
+    apps/setplot.cc
+)
+
+target_link_libraries(setplot PRIVATE core)
+
+###########################################

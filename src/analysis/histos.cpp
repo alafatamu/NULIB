@@ -10,6 +10,7 @@
 #include "TString.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TKey.h"
 
 using namespace tformat;
 
@@ -343,5 +344,95 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   PSDvT->Write();
   
   std::cout<<"Analysed histograms saved..."<<std::endl;
+  return;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void set_histos(TFile& DataFile, TFile& HDump, int barreq){
+  TString out_dirname = Form("bar%d",barreq);
+  if(barreq==1234) out_dirname = "all";
+
+  //make an output directory for the selected bar
+  TDirectory* B_Dir = HDump.GetDirectory(out_dirname); //check for the directory
+  if(B_Dir) HDump.rmdir(out_dirname); //delete the directory (and its contents) if it already exists
+  B_Dir = HDump.mkdir(out_dirname); //make the new directory
+  if(B_Dir==nullptr){std::cout<<RED<<"Error: could not make BAR directory in HDump"<<RESET<<std::endl;return;}
+
+  //Make the histograms before starting any loops
+  TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
+  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 100, 0, 1);
+
+  //loop through all top-level objects in the data file
+  TIter next(DataFile.GetListOfKeys());
+  TKey* key = nullptr;
+
+  while((key=(TKey*)next())){
+    TObject* obj = key->ReadObj();
+    if(obj==nullptr) continue;
+    if (!obj->InheritsFrom(TDirectory::Class())) {
+      delete obj;
+      continue;
+    } 
+    TDirectory* inputbase = (TDirectory*)obj; //now we can designate our object as the input directory
+    //this SHOULD be titled "runxxxx" and SHOULD contain 3 trees: raw, processed, analysed
+    TString in_dirname = inputbase->GetName();
+    if(!in_dirname.BeginsWith("run")){
+      delete obj;
+      continue; //skip this directory if it doesn't match the naming convention
+    }
+
+    //Now we can grab the analysis tree
+    TTree* ATree = nullptr;
+    inputbase->GetObject("analysed", ATree);
+    if(ATree==nullptr){
+      std::cout<<YELLOW<<"Warning: could not find analysed tree in "
+               <<in_dirname<<RESET<<std::endl;
+      delete obj;
+      continue;
+    }
+
+    //prepare the branches and variables for reading the tree
+    treebiz::ATreeReadData AData;
+    treebiz::set_ATreeBranches(*ATree, AData);
+
+    //loop through each event and fill the histograms
+    std::cout<<"Reading "<<ATree->GetEntries()<<" events from "<<in_dirname<<std::flush;
+    int plottedhits = 0;
+    for(int i=0; i<ATree->GetEntries(); i++){
+      ATree->GetEntry(i);
+      for (int h=0;h<AData.coupledhits;h++){
+
+        if((*AData.barshit)[h]!=barreq && barreq!=1234) continue;
+        plottedhits++;
+        PSD->Fill((*AData.PSD)[h]);
+        double EfromC = (double)(*AData.Cint_top)[h]+(double)(*AData.Cint_bot)[h];
+        double EfromAB = (double)(*AData.Aint_top)[h]+(double)(*AData.Aint_bot)[h]+(double)(*AData.Bint_top)[h]+(double)(*AData.Bint_bot)[h];
+        PSDvC->Fill(EfromC,(*AData.PSD)[h]);
+        PSDvAB->Fill(EfromAB,(*AData.PSD)[h]);
+
+      }
+    }
+    std::cout<<" ---> "<<plottedhits<<" hits plotted."<<std::endl;
+    
+    //done with the directory? Delete it.
+    delete obj;
+
+  }
+
+  //now that everything has been looped through, let's write the histograms to the output directory
+  B_Dir->cd();
+  PSD->Write();
+  PSDvC->Write();
+  PSDvAB->Write();
+
+  std::cout<<"Histograms saved ";
+  if(barreq==1234){
+    std::cout<<"for all bars."<<std::endl;
+  }else{
+    std::cout<<"for bar "<<barreq<<"."<<std::endl;
+  }
+
   return;
 }
