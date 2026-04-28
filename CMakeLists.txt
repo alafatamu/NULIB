@@ -31,37 +31,10 @@ target_link_libraries(core PUBLIC
 )
 
 ###########################################
-add_executable(view
-    apps/view.cc
+add_executable(vpp
+    apps/vpp.cc
 )
 
-target_link_libraries(view PRIVATE core)
-
-###########################################
-add_executable(eproc
-    apps/eproc.cc
-)
-
-target_link_libraries(eproc PRIVATE core)
-###########################################
-add_executable(eplot
-    apps/eplot.cc
-)
-
-target_link_libraries(eplot PRIVATE core)
-
-###########################################
-add_executable(setproc
-    apps/setproc.cc
-)
-
-target_link_libraries(setproc PRIVATE core)
-
-###########################################
-add_executable(setplot
-    apps/setplot.cc
-)
-
-target_link_libraries(setplot PRIVATE core)
+target_link_libraries(vpp PRIVATE core)
 
 ###########################################
