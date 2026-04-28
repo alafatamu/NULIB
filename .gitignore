@@ -420,3 +420,4 @@ FodyWeavers.xsd
 # Custom additions to the ignore list
 /build/
 /databox/
+/info/config.cfg
