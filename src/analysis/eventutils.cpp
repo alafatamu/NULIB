@@ -183,10 +183,19 @@ namespace eventutils{
 
     //Now we need to calculate the PSD
     for (int h=0;h<outevent.coupledhits;h++){
-      double PSDvaltop = 1.-((double)(outevent.Bint_top[h])/(double)(outevent.Aint_top[h]));
-      double PSDvalbot = 1.-((double)(outevent.Bint_bot[h])/(double)(outevent.Aint_bot[h]));
-      double PSDval = 1.-(((double)outevent.Bint_top[h]+(double)outevent.Bint_bot[h])/
-                          ((double)outevent.Aint_top[h]+(double)outevent.Aint_bot[h]));
+      //load these up for equation readability
+      double A_top=(double)outevent.Aint_top[h];
+      double A_bot=(double)outevent.Aint_bot[h];
+      double B_top=(double)outevent.Bint_top[h];
+      double B_bot=(double)outevent.Bint_bot[h];
+      double C_top=(double)outevent.Cint_top[h];
+      double C_bot=(double)outevent.Cint_bot[h];
+      double T_top=(double)outevent.Tint_top[h];
+      double T_bot=(double)outevent.Tint_bot[h];
+
+      double PSDvaltop = 1.-(B_top/A_top);
+      double PSDvalbot = 1.-(B_bot/A_bot);
+      double PSDval = 1.-((B_top+B_bot)/(A_top+A_bot));
 
       outevent.PSDtop.push_back(PSDvaltop);
       outevent.PSDbot.push_back(PSDvalbot);
