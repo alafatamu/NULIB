@@ -196,18 +196,10 @@ namespace eventutils{
       double T_top=(double)outevent.Tint_top[h];
       double T_bot=(double)outevent.Tint_bot[h];
 
-      double CA_top = C_top-B_top;
-      double CA_bot = C_bot-B_bot;
-      double CB_top = C_top-A_top;
-      double CB_bot = C_bot-A_bot;
-
-      double Q_top = A_top+B_top;
-      double Q_bot = A_bot+B_bot;
-      double Q = 0.5*(Q_top+Q_bot);
       double EfromA = A_top+A_bot; //this is what dustin called totalE
 
-      double PSDvaltop = B_top/Q_top;
-      double PSDvalbot = B_bot/Q_bot;
+      double PSDvaltop = B_top/A_top;
+      double PSDvalbot = B_bot/A_bot;
       double PSDval = 1.-((B_top+B_bot)/(A_top+A_bot));
       //double PSDval = (B_top+B_bot)/Q;
 
