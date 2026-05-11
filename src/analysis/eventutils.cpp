@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <unordered_set>
+#include <cmath>
 
 //stuff used in event processing only
 #include "analysis/detector.hpp"
@@ -76,6 +77,7 @@ namespace eventutils{
 
         if(texneut.getbar(h_chip,h_chan)!=texneut.getbar(j_chip,j_chan))continue; //confirm they are in the same bar
         int barseen=texneut.getbar(h_chip,h_chan); //store bar number in a variable for later use
+        if(barseen<0)continue; //skip if we have a bad bar
         outevent.barshit.push_back(barseen); //record the bar number in the event object
         
         used[h]=used[j]=true;//now we can do our full processing
@@ -95,10 +97,10 @@ namespace eventutils{
         double topgain,botgain,Atop,Abot,Btop,Bbot;
         topgain = texneut.get_gainfactors(barseen,0);
         botgain = texneut.get_gainfactors(barseen,1);
-        Atop = (double)outevent.Aint[t];//*topgain;//-texneut.get_offset(t_chip,t_chan,0);
-        Abot = (double)outevent.Aint[b];//*botgain;//-texneut.get_offset(b_chip,b_chan,1);
-        Btop = (double)outevent.Bint[t];//*topgain;//-texneut.get_offset(t_chip,t_chan,1);
-        Bbot = (double)outevent.Bint[b];//*botgain;//-texneut.get_offset(b_chip,b_chan,0);
+        Atop = (double)outevent.Aint[t]-texneut.get_offset(t_chip,t_chan,0);
+        Abot = (double)outevent.Aint[b]-texneut.get_offset(b_chip,b_chan,1);
+        Btop = (double)outevent.Bint[t]-texneut.get_offset(t_chip,t_chan,1);
+        Bbot = (double)outevent.Bint[b]-texneut.get_offset(b_chip,b_chan,0);
 
         outevent.barshit.push_back(barseen);
 
@@ -165,6 +167,7 @@ namespace eventutils{
 
   analysed_event analyse_event(processed_event inevent){
     analysed_event outevent;
+    //copy over the essentials
     outevent.timestamp = inevent.timestamp;
     outevent.coupledhits = inevent.coupledhits;
     outevent.barshit = std::move(inevent.barshit);
@@ -181,7 +184,7 @@ namespace eventutils{
     outevent.Tint_top = std::move(inevent.Tint_top);
     outevent.Tint_bot = std::move(inevent.Tint_bot);
 
-    //Now we need to calculate the PSD
+    //Calculate the PSD
     for (int h=0;h<outevent.coupledhits;h++){
       //load these up for equation readability
       double A_top=(double)outevent.Aint_top[h];
@@ -193,9 +196,20 @@ namespace eventutils{
       double T_top=(double)outevent.Tint_top[h];
       double T_bot=(double)outevent.Tint_bot[h];
 
-      double PSDvaltop = 1.-(B_top/A_top);
-      double PSDvalbot = 1.-(B_bot/A_bot);
+      double CA_top = C_top-B_top;
+      double CA_bot = C_bot-B_bot;
+      double CB_top = C_top-A_top;
+      double CB_bot = C_bot-A_bot;
+
+      double Q_top = A_top+B_top;
+      double Q_bot = A_bot+B_bot;
+      double Q = 0.5*(Q_top+Q_bot);
+      double EfromA = A_top+A_bot; //this is what dustin called totalE
+
+      double PSDvaltop = B_top/Q_top;
+      double PSDvalbot = B_bot/Q_bot;
       double PSDval = 1.-((B_top+B_bot)/(A_top+A_bot));
+      //double PSDval = (B_top+B_bot)/Q;
 
       outevent.PSDtop.push_back(PSDvaltop);
       outevent.PSDbot.push_back(PSDvalbot);
@@ -208,7 +222,7 @@ namespace eventutils{
       outevent.rho.push_back(0.);
       outevent.theta.push_back(0.);
       outevent.phi.push_back(0.);
-      outevent.E_calc.push_back(0.);  
+      outevent.E_calc.push_back(EfromA);  
     }
 
     return outevent;
