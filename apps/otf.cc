@@ -25,8 +25,10 @@ int main(){
     return 0;
   }
 
-  int runreq = 0;
+  int runreq = 1822;
+  int barreq = 1234;
   std::cout<<"Run to view: "<<std::endl; std::cin>>runreq;
+  std::cout<<"Bar to plot (1234 to plot all): ";std::cin>>barreq;std::cout<<std::endl; 
   if(runreq==0) return 0;
 
   int reproc = 0;
@@ -65,6 +67,7 @@ int main(){
   }
 
   std::string modifier = "";
+  if(barreq!=1234) modifier = "_bar"+std::to_string(barreq);
   modifier += "_histos";
   std::string HDumpName = namebuilder::get_OutputROOTName(cfg, runreq, modifier); //generate a histos file name
   TFile HDump(HDumpName.c_str(),"UPDATE");
@@ -75,7 +78,7 @@ int main(){
   std::cout<<"Dumping histograms to "<<HDumpName<<std::endl;
   base_histos(DataFile, HDump); //dump the histograms
   proc_histos(DataFile, HDump); //dump the histograms
-  calc_histos(DataFile, HDump, -10, 1234); //dump the histograms
+  calc_histos(DataFile, HDump, -10, barreq); //dump the histograms
 
   return 0;
 }
