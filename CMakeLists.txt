@@ -45,3 +45,9 @@ add_executable(setplot
 target_link_libraries(setplot PRIVATE core)
 
 ###########################################
+
+add_executable(otf
+    apps/otf.cc
+)
+
+target_link_libraries(otf PRIVATE core)

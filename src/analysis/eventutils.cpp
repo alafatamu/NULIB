@@ -200,7 +200,7 @@ namespace eventutils{
 
       double PSDvaltop = B_top/A_top;
       double PSDvalbot = B_bot/A_bot;
-      double PSDval = 1.-((B_top+B_bot)/(A_top+A_bot));
+      double PSDval = (B_top+B_bot)/(A_top+A_bot);
       //double PSDval = (B_top+B_bot)/Q;
 
       outevent.PSDtop.push_back(PSDvaltop);
