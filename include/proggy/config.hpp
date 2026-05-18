@@ -12,6 +12,7 @@ struct INFOCON {
     std::string PosMapFile = "barpositionmap.txt";
     std::string GainFile = "pmtgains.txt";
     std::string VertexFile = "reactionvertex.txt";
+    std::string PSDCutFile = "PSDvAB_cuts.root";
 };
 
 INFOCON load_config(const std::string&);

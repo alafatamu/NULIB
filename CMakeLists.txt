@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(ROOT REQUIRED COMPONENTS Tree RIO)
+find_package(ROOT REQUIRED COMPONENTS Tree RIO Hist Graf)
 
 add_library(core
     src/analysis/eventutils.cpp
@@ -25,9 +25,11 @@ target_include_directories(core PUBLIC
 )
 
 target_link_libraries(core PUBLIC
-    ROOT::Tree
+    ROOT::Core
+    ROOT::Tree 
     ROOT::RIO
     ROOT::Hist
+    ROOT::Graf
 )
 
 ###########################################

@@ -48,7 +48,7 @@ namespace eventutils{
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-  processed_event process_event(raw_event rawevent, detector texneut){
+  processed_event process_event(raw_event rawevent, detector& texneut){
     processed_event outevent;
     outevent.keep = false; //default is toss
     //Let's copy over the raw data
@@ -197,6 +197,7 @@ namespace eventutils{
       double T_bot=(double)outevent.Tint_bot[h];
 
       double EfromA = A_top+A_bot; //this is what dustin called totalE
+      double EfromAB = A_top+A_bot+B_top+B_bot;
 
       double PSDvaltop = B_top/A_top;
       double PSDvalbot = B_bot/A_bot;
@@ -214,7 +215,7 @@ namespace eventutils{
       outevent.rho.push_back(0.);
       outevent.theta.push_back(0.);
       outevent.phi.push_back(0.);
-      outevent.E_calc.push_back(EfromA);  
+      outevent.E_calc.push_back(EfromAB);  
     }
 
     return outevent;

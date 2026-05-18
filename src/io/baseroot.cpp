@@ -16,7 +16,7 @@ using namespace tformat;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector texneut, int runid){
+int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector& texneut, int runid){
   TDirectory* run_dir = nullptr;
   if(runid!=-10){ //-10 is the default 
                   //ideally, the user will include the runID in the file name if they don't specify the run in the function call

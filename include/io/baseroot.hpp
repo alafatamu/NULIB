@@ -10,4 +10,4 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int Evt_to_ROOT(std::ifstream&, TFile&, detector, int runid = -10);
+int Evt_to_ROOT(std::ifstream&, TFile&, detector&, int runid = -10);

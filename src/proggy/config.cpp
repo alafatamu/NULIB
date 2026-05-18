@@ -79,6 +79,9 @@ INFOCON load_config(const std::string& path) {
         { "VertexFile", [&](const std::string& v) {
             cfg.VertexFile = apply_default(v, "reactionvertex.txt");
         }},
+        { "PSDCutFile", [&](const std::string& v) {
+            cfg.PSDCutFile = apply_default(v, "PSDvAB_cuts.root");
+        }}
     };
 
     std::string line;

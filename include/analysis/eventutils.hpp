@@ -69,6 +69,6 @@ namespace eventutils{
   //Functions for handling the event data (and structs)
   void display_raw(raw_event);
   void display_event(processed_event);
-  processed_event process_event(raw_event, detector);
+  processed_event process_event(raw_event, detector&);
   analysed_event analyse_event(processed_event);
 }
