@@ -97,10 +97,10 @@ namespace eventutils{
         double topgain,botgain,Atop,Abot,Btop,Bbot;
         topgain = texneut.get_gainfactors(barseen,0);
         botgain = texneut.get_gainfactors(barseen,1);
-        Atop = (double)outevent.Aint[t];//-texneut.get_offset(t_chip,t_chan,1);
-        Abot = (double)outevent.Aint[b];//-texneut.get_offset(b_chip,b_chan,0);
-        Btop = (double)outevent.Bint[t];//-texneut.get_offset(t_chip,t_chan,0);
-        Bbot = (double)outevent.Bint[b];//-texneut.get_offset(b_chip,b_chan,1);
+        Atop = (double)outevent.Aint[t]+texneut.get_offset(t_chip,t_chan,0);
+        Abot = (double)outevent.Aint[b]+texneut.get_offset(b_chip,b_chan,1);
+        Btop = (double)outevent.Bint[t]+texneut.get_offset(t_chip,t_chan,1);
+        Bbot = (double)outevent.Bint[b]+texneut.get_offset(b_chip,b_chan,0);
 
         outevent.barshit.push_back(barseen);
 
