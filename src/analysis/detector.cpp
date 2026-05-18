@@ -46,7 +46,7 @@ bool detector::ReadMap(std::string barmapfile){
   }else std::cout<<GREEN<<"Bar mapping file "<<barmapfile<<" opened\n"<<RESET;
 
   int inchip,inchipchan,outchan,outtdcchan,outx,outy,outbarnum; //read chip and channel and output bar position and ID
-  double outAoffset,outBoffset,tdcoffset;
+  double outAoffset,outBoffset;
 
   while (inmap.good()){
     inmap>>inchip>>inchipchan>>outchan>>outtdcchan>>outx

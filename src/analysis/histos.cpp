@@ -300,10 +300,15 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   treebiz::set_ATreeBranches(*ATree, AData);
 
   //Make the histograms
+  TH1F* CmAB = new TH1F("CmAB", "CmAB", 3000, -3000, 3000);
+  TH1F* BmA = new TH1F("BmA", "BmA", 3000, -3000, 3000);
+
   TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
   TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
   TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
 
+  TH2F* PSDvEcalc = new TH2F("PSDvEcalc", "PSDvEcalc", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 100, 0, 1);
   TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 1000, 0, 10000, 100, 0, 1);
   TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 1000, 0, 10000, 100, 0, 1);
   TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 1000, 0, 10000, 100, 0, 1);
@@ -318,14 +323,23 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
       if((*AData.barshit)[h]==barreq||barreq==1234) plot = true;
       if(!plot)continue;
 
+      int ABval = (*AData.Aint_top)[h]+(*AData.Aint_bot)[h]+(*AData.Bint_top)[h]+(*AData.Bint_bot)[h];
+      int BmAval = (*AData.Bint_top)[h]+(*AData.Bint_bot)[h]-(*AData.Aint_top)[h]-(*AData.Aint_bot)[h];
+      int Cval = (*AData.Cint_top)[h]+(*AData.Cint_bot)[h];
+      CmAB->Fill(Cval-ABval);
+      BmA->Fill(BmAval);
+
+
       PSD->Fill((*AData.PSD)[h]);
       PSDtop->Fill((*AData.PSD_top)[h]);
       PSDbot->Fill((*AData.PSD_bot)[h]);
 
-      double EfromC = (double)(*AData.Cint_top)[h]+(double)(*AData.Cint_bot)[h];
-      PSDvC->Fill(EfromC,(*AData.PSD)[h]);
-      PSDtopC->Fill(EfromC,(*AData.PSD_top)[h]);
-      PSDbotC->Fill(EfromC,(*AData.PSD_bot)[h]);
+      double Ecalc = (double)(*AData.E_calc)[h];
+      PSDvEcalc->Fill(Ecalc,(*AData.PSD)[h]);
+      PSDvC->Fill(Cval,(*AData.PSD)[h]);
+      PSDvAB->Fill(ABval,(*AData.PSD)[h]);
+      PSDtopC->Fill(Cval,(*AData.PSD_top)[h]);
+      PSDbotC->Fill(Cval,(*AData.PSD_bot)[h]);
 
       double Tavg = ((double)(*AData.Tint_top)[h]+(double)(*AData.Tint_bot)[h])/2.;
       PSDvT->Fill(Tavg,(*AData.PSD)[h]);
@@ -333,10 +347,14 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   }
 
   A_Dir->cd();
+  CmAB->Write();
+  BmA->Write();
   PSD->Write();
   PSDtop->Write();
   PSDbot->Write();
 
+  PSDvEcalc->Write();
+  PSDvAB->Write();
   PSDvC->Write();
   PSDtopC->Write();
   PSDbotC->Write();
@@ -363,6 +381,7 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
   TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
   TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 1000, 0, 10000, 100, 0, 1);
   TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDvE = new TH2F("PSDvE", "PSDvE", 1000, 0, 10000, 100, 0, 1);
 
   //loop through all top-level objects in the data file
   TIter next(DataFile.GetListOfKeys());
@@ -409,9 +428,13 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
         PSD->Fill((*AData.PSD)[h]);
         double EfromC = (double)(*AData.Cint_top)[h]+(double)(*AData.Cint_bot)[h];
         double EfromAB = (double)(*AData.Aint_top)[h]+(double)(*AData.Aint_bot)[h]+(double)(*AData.Bint_top)[h]+(double)(*AData.Bint_bot)[h];
+        double EfromA = (double)(*AData.Aint_top)[h]+(double)(*AData.Aint_bot)[h];
+        double Qtop = (double)(*AData.Aint_top)[h]+(double)(*AData.Bint_top)[h];
+        double Qbot = (double)(*AData.Aint_bot)[h]+(double)(*AData.Bint_bot)[h];
+        double Qcalc = 0.5*(Qtop+Qbot);
         PSDvC->Fill(EfromC,(*AData.PSD)[h]);
         PSDvAB->Fill(EfromAB,(*AData.PSD)[h]);
-
+        PSDvE->Fill(EfromA,(*AData.PSD)[h]);
       }
     }
     std::cout<<" ---> "<<plottedhits<<" hits plotted."<<std::endl;
@@ -426,6 +449,7 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
   PSD->Write();
   PSDvC->Write();
   PSDvAB->Write();
+  PSDvE->Write();
 
   std::cout<<"Histograms saved ";
   if(barreq==1234){
