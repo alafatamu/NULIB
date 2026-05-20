@@ -53,6 +53,7 @@ namespace eventutils{
     long long int timestamp;
     int coupledhits;
     std::vector<int> barshit;
+    std::vector<int> nmaybe;
     std::vector<int> chip_top, chip_bot;
     std::vector<int> chan_top, chan_bot;
     std::vector<int> Aint_top, Aint_bot;
@@ -70,5 +71,5 @@ namespace eventutils{
   void display_raw(raw_event);
   void display_event(processed_event);
   processed_event process_event(raw_event, detector&);
-  analysed_event analyse_event(processed_event);
+  analysed_event analyse_event(processed_event, detector&);
 }

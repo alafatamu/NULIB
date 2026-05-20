@@ -59,6 +59,7 @@ namespace treebiz{
     tree.Branch("timestamp", &AData.timestamp);
     tree.Branch("coupledhits", &AData.coupledhits);
     tree.Branch("barshit", &AData.barshit);
+    tree.Branch("nmaybe", &AData.nmaybe);
     tree.Branch("chip_top", &AData.chip_top);
     tree.Branch("chip_bot", &AData.chip_bot);
     tree.Branch("chan_top", &AData.chan_top);
@@ -141,6 +142,7 @@ namespace treebiz{
     AData.timestamp = analysedevent.timestamp;
     AData.coupledhits = analysedevent.coupledhits;
     AData.barshit = analysedevent.barshit;
+    AData.nmaybe = analysedevent.nmaybe;
     AData.chip_top = analysedevent.chip_top;
     AData.chip_bot = analysedevent.chip_bot;
     AData.chan_top = analysedevent.chan_top;
@@ -224,6 +226,7 @@ namespace treebiz{
     tree.SetBranchAddress("timestamp", &AData.timestamp);
     tree.SetBranchAddress("coupledhits", &AData.coupledhits);
     tree.SetBranchAddress("barshit", &AData.barshit);
+    tree.SetBranchAddress("nmaybe", &AData.nmaybe);
     
     tree.SetBranchAddress("chip_top", &AData.chip_top);
     tree.SetBranchAddress("chip_bot", &AData.chip_bot);

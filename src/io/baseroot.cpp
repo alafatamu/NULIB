@@ -62,7 +62,7 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector& te
         goodcount++;
         treebiz::fill_PTreeData(PData, processedevent);
         PTree.Fill();
-        analysed_event analysedevent = eventutils::analyse_event(processedevent);
+        analysed_event analysedevent = eventutils::analyse_event(processedevent, texneut);
         treebiz::fill_ATreeData(AData, analysedevent);
         ATree.Fill();
       }else continue;

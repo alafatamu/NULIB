@@ -50,6 +50,7 @@ namespace treebiz{
     long long int timestamp = 0;
     int coupledhits = 0;
     std::vector<int> barshit;
+    std::vector<int> nmaybe;
     std::vector<int> chip_top,chip_bot;
     std::vector<int> chan_top,chan_bot;
     std::vector<int> Aint_top,Aint_bot;
@@ -115,6 +116,7 @@ namespace treebiz{
     long long int timestamp = 0;
     int coupledhits = 0;
     std::vector<int>* barshit = nullptr;
+    std::vector<int>* nmaybe = nullptr;
     std::vector<int>* chip_top = nullptr;
     std::vector<int>* chip_bot = nullptr;
     std::vector<int>* chan_top = nullptr;

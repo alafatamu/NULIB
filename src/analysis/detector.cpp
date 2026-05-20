@@ -55,26 +55,19 @@ double detector::get_offset(int chip, int chan, int osreq){
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 // PSD CUT FUNCTIONS
 
-bool detector::load_PSDcuts(INFOCON cfg){
-
-  std::string PSDCutFileName = cfg.ExpInfoDir + cfg.PSDCutFile;
-
+bool detector::load_PSDcuts(std::string PSDCutFileName){
   TFile cutfile(PSDCutFileName.c_str(), "READ");
-
   if (!cutfile.IsOpen() || cutfile.IsZombie()) {
     std::cout << BOLDRED << "PSD cut file " << PSDCutFileName
               << " does not exist or failed to open" << RESET << std::endl;
     psd_cuts_loaded = false;
     return false;
   }
-
   std::cout << GREEN << "PSD cut file " << PSDCutFileName
             << " opened" << RESET << std::endl;
-
   int nloaded = 0;
 
   for (int bar = 0; bar < static_cast<int>(psd_cuts.size()); ++bar) {
-
     // If cuts were already loaded, delete old copies before replacing them.
     if (psd_cuts[bar]) {
       delete psd_cuts[bar];
@@ -83,10 +76,8 @@ bool detector::load_PSDcuts(INFOCON cfg){
 
     char cutname[128];
     std::snprintf(cutname, sizeof(cutname), "bar%d_PSDvAB_cut", bar);
-
     TCutG* filecut = nullptr;
     cutfile.GetObject(cutname, filecut);
-
     // Optional fallback in case your saved cut names use capital "Bar".
     if (!filecut) {
       char altcutname[128];
@@ -94,9 +85,7 @@ bool detector::load_PSDcuts(INFOCON cfg){
       cutfile.GetObject(altcutname, filecut);
     }
 
-    if (!filecut) {
-      continue;
-    }
+    if (!filecut) continue;
 
     // Clone the cut so the detector owns it after cutfile closes.
     psd_cuts[bar] = dynamic_cast<TCutG*>(filecut->Clone(cutname));
@@ -111,57 +100,30 @@ bool detector::load_PSDcuts(INFOCON cfg){
   }
 
   cutfile.Close();
-
   psd_cuts_loaded = (nloaded > 0);
 
   if (psd_cuts_loaded) {
-    std::cout << GREEN << "Loaded " << nloaded
-              << " PSD cuts" << RESET << std::endl;
-  } else {
-    std::cout << BOLDRED << "No PSD cuts were loaded from "
-              << PSDCutFileName << RESET << std::endl;
+    std::cout << GREEN << "Loaded " << nloaded << " PSD cuts" << RESET << std::endl;
+  }else{ 
+    std::cout << BOLDRED << "No PSD cuts were loaded from " << PSDCutFileName << RESET << std::endl;
   }
 
   return psd_cuts_loaded;
 }
 
 bool detector::has_PSDcut(int bar) const{
-  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) {
-    return false;
-  }
-
+  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size()))return false;
   return psd_cuts[bar] != nullptr;
 }
 
 bool detector::passes_PSDcut(int bar, double AB, double PSD) const{
-  /*
-    This assumes your PSDvAB histograms were filled like:
-
-        hPSDvAB->Fill(E_calc, PSD);
-
-    Therefore:
-        x = AB = E_calc
-        y = PSD
-
-    So the cut check is:
-        IsInside(AB, PSD)
-  */
-
-  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) {
-    return false;
-  }
-
-  if (!std::isfinite(AB) || !std::isfinite(PSD)) {
-    return false;
-  }
-
+  /*This assumes your PSDvAB histograms were filled like: hPSDvAB->Fill(E_calc, PSD);
+    Therefore: x = AB = E_calc, y = PSD
+    So the cut check is: IsInside(AB, PSD) */
+  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) return false;
+  if (!std::isfinite(AB) || !std::isfinite(PSD)) return false;
   TCutG* cut = psd_cuts[bar];
-
-  if (!cut) {
-    // Strict behavior: if no cut exists for this bar, reject the hit.
-    return false;
-  }
-
+  if (!cut) return false; // Strict behavior: if no cut exists for this bar, reject the hit.
   return cut->IsInside(AB, PSD);
 }
 
@@ -295,19 +257,17 @@ bool detector::ReadGains(std::string gainfile)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-bool detector::fill_maps(INFOCON cfg)
-{
+bool detector::fill_maps(INFOCON cfg){
   std::string BarMapFileName = cfg.ExpInfoDir + cfg.BarMapFile;
   std::string PosMapFileName = cfg.ExpInfoDir + cfg.PosMapFile;
   std::string GainFileName = cfg.ExpInfoDir + cfg.GainFile;
+  std::string PSDCutFileName = cfg.OutputDir + cfg.PSDCutFile;
 
   bool mapread = ReadMap(BarMapFileName);
   bool posmapread = ReadPositionMap(PosMapFileName);
   bool gainread = ReadGains(GainFileName);
+  bool psdcutread = load_PSDcuts(PSDCutFileName);
 
-  if (!mapread || !posmapread || !gainread) {
-    return false;
-  }
-
+  if (!mapread || !posmapread || !gainread || !psdcutread) return false;
   return true;
 }

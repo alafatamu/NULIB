@@ -165,7 +165,7 @@ namespace eventutils{
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-  analysed_event analyse_event(processed_event inevent){
+  analysed_event analyse_event(processed_event inevent, detector& texneut){
     analysed_event outevent;
     //copy over the essentials
     outevent.timestamp = inevent.timestamp;
@@ -203,6 +203,9 @@ namespace eventutils{
       double PSDvalbot = B_bot/A_bot;
       double PSDval = (B_top+B_bot)/(A_top+A_bot);
       //double PSDval = (B_top+B_bot)/Q;
+
+      //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
+      outevent.nmaybe.push_back((int)(texneut.passes_PSDcut(outevent.barshit[h],EfromAB,PSDval)));
 
       outevent.PSDtop.push_back(PSDvaltop);
       outevent.PSDbot.push_back(PSDvalbot);

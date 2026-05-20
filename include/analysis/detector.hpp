@@ -59,7 +59,7 @@ class detector{
     int get_bottom_pmt_id(int);
 
     // PSD CUT FUNCTIONS
-    bool load_PSDcuts(INFOCON);
+    bool load_PSDcuts(std::string);
     bool has_PSDcut(int bar) const;
     bool passes_PSDcut(int bar, double AB, double PSD) const;
 
@@ -67,5 +67,6 @@ class detector{
     bool ReadMap(std::string);
     bool ReadPositionMap(std::string);
     bool ReadGains(std::string);
+  
     bool fill_maps(INFOCON);
 };
