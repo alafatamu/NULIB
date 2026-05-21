@@ -196,17 +196,20 @@ namespace eventutils{
       double T_top=(double)outevent.Tint_top[h];
       double T_bot=(double)outevent.Tint_bot[h];
 
-      double EfromA = A_top+A_bot; //this is what dustin called totalE
-      double EfromAB = A_top+A_bot+B_top+B_bot;
+      //double EfromA = A_top+A_bot; //this is what dustin called totalE
+      double E_AB = A_top+A_bot+B_top+B_bot;
 
-      double PSDvaltop = B_top/A_top;
-      double PSDvalbot = B_bot/A_bot;
-      double PSDval = (B_top+B_bot)/(A_top+A_bot);
+      double PSDvaltop = 1-B_top/A_top;
+      double PSDvalbot = 1-B_bot/A_bot;
+      double PSDval = 1-(B_top+B_bot)/(A_top+A_bot);
       //double PSDval = (B_top+B_bot)/Q;
 
-      //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
-      outevent.PIDtag.push_back((int)(texneut.passes_PSDcut(outevent.bar_id[h],EfromAB,PSDval)));
+      if(texneut.has_PSDcuts()){
+        //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
+        outevent.PIDtag.push_back((int)(texneut.PIDtag(outevent.bar_id[h],E_AB,PSDval)));
+      }else{outevent.PIDtag.push_back(0);}
 
+      outevent.E_AB.push_back(E_AB);
       outevent.PSD_top.push_back(PSDvaltop);
       outevent.PSD_bot.push_back(PSDvalbot);
       outevent.PSD.push_back(PSDval);
@@ -218,7 +221,7 @@ namespace eventutils{
       outevent.rho.push_back(0.);
       outevent.theta.push_back(0.);
       outevent.phi.push_back(0.);
-      outevent.E_calc.push_back(EfromAB);  
+      outevent.E_calc.push_back(0.);  
     }
 
     return outevent;

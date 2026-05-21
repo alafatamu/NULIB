@@ -307,7 +307,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
   TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
 
-  TH2F* PSDvEcalc = new TH2F("PSDvEcalc", "PSDvEcalc", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDvE_AB = new TH2F("PSDvE_AB", "PSDvE_AB", 1000, 0, 10000, 100, 0, 1);
   TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 100, 0, 1);
   TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 1000, 0, 10000, 100, 0, 1);
   TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 1000, 0, 10000, 100, 0, 1);
@@ -334,8 +334,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
       PSDtop->Fill((*AData.r_PSD_top)[h]);
       PSDbot->Fill((*AData.r_PSD_bot)[h]);
 
-      double Ecalc = (double)(*AData.r_E_calc)[h];
-      PSDvEcalc->Fill(Ecalc,(*AData.r_PSD)[h]);
+      PSDvE_AB->Fill((*AData.r_E_AB)[h],(*AData.r_PSD)[h]);
       PSDvC->Fill(Cval,(*AData.r_PSD)[h]);
       PSDvAB->Fill(ABval,(*AData.r_PSD)[h]);
       PSDtopC->Fill(Cval,(*AData.r_PSD_top)[h]);
@@ -353,7 +352,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   PSDtop->Write();
   PSDbot->Write();
 
-  PSDvEcalc->Write();
+  PSDvE_AB->Write();
   PSDvAB->Write();
   PSDvC->Write();
   PSDtopC->Write();
@@ -427,13 +426,9 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
         plottedhits++;
         PSD->Fill((*AData.r_PSD)[h]);
         double EfromC = (double)(*AData.r_Cint_top)[h]+(double)(*AData.r_Cint_bot)[h];
-        double EfromAB = (double)(*AData.r_Aint_top)[h]+(double)(*AData.r_Aint_bot)[h]+(double)(*AData.r_Bint_top)[h]+(double)(*AData.r_Bint_bot)[h];
         double EfromA = (double)(*AData.r_Aint_top)[h]+(double)(*AData.r_Aint_bot)[h];
-        double Qtop = (double)(*AData.r_Aint_top)[h]+(double)(*AData.r_Bint_top)[h];
-        double Qbot = (double)(*AData.r_Aint_bot)[h]+(double)(*AData.r_Bint_bot)[h];
-        double Qcalc = 0.5*(Qtop+Qbot);
         PSDvC->Fill(EfromC,(*AData.r_PSD)[h]);
-        PSDvAB->Fill(EfromAB,(*AData.r_PSD)[h]);
+        PSDvAB->Fill((*AData.r_E_AB)[h],(*AData.r_PSD)[h]);
         PSDvE->Fill(EfromA,(*AData.r_PSD)[h]);
       }
     }

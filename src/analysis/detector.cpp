@@ -75,13 +75,13 @@ bool detector::load_PSDcuts(std::string PSDCutFileName){
     }
 
     char cutname[128];
-    std::snprintf(cutname, sizeof(cutname), "bar%d_PSDvAB_cut", bar);
+    std::snprintf(cutname, sizeof(cutname), "bar%d_PSD_cut", bar);
     TCutG* filecut = nullptr;
     cutfile.GetObject(cutname, filecut);
     // Optional fallback in case your saved cut names use capital "Bar".
     if (!filecut) {
       char altcutname[128];
-      std::snprintf(altcutname, sizeof(altcutname), "Bar%d_PSDvAB_cut", bar);
+      std::snprintf(altcutname, sizeof(altcutname), "Bar%d_PSD_cut", bar);
       cutfile.GetObject(altcutname, filecut);
     }
 
@@ -116,15 +116,20 @@ bool detector::has_PSDcut(int bar) const{
   return psd_cuts[bar] != nullptr;
 }
 
-bool detector::passes_PSDcut(int bar, double AB, double PSD) const{
-  /*This assumes your PSDvAB histograms were filled like: hPSDvAB->Fill(E_calc, PSD);
-    Therefore: x = AB = E_calc, y = PSD
-    So the cut check is: IsInside(AB, PSD) */
-  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) return false;
-  if (!std::isfinite(AB) || !std::isfinite(PSD)) return false;
+int detector::PIDtag(int bar, double AB, double PSD) const{
+  int PIDtag = 0;
+  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) return PIDtag;
+  if (!std::isfinite(AB) || !std::isfinite(PSD)) return PIDtag;
   TCutG* cut = psd_cuts[bar];
-  if (!cut) return false; // Strict behavior: if no cut exists for this bar, reject the hit.
-  return cut->IsInside(AB, PSD);
+  if (!cut) return PIDtag; // Strict behavior: if no cut exists for this bar, reject the hit.
+
+  if (cut->IsInside(AB, PSD)) PIDtag = 1; //ONLY CHANGE PIDtag IF THE CUT PASSES
+  return PIDtag;
+}
+
+bool detector::has_PSDcuts(){
+  if (psd_cuts_loaded) return true;
+  return false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -268,6 +273,6 @@ bool detector::fill_maps(INFOCON cfg){
   bool gainread = ReadGains(GainFileName);
   bool psdcutread = load_PSDcuts(PSDCutFileName);
 
-  if (!mapread || !posmapread || !gainread || !psdcutread) return false;
+  if (!mapread || !posmapread || !gainread) return false;
   return true;
 }

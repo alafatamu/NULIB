@@ -61,7 +61,8 @@ class detector{
     // PSD CUT FUNCTIONS
     bool load_PSDcuts(std::string);
     bool has_PSDcut(int bar) const;
-    bool passes_PSDcut(int bar, double AB, double PSD) const;
+    int PIDtag(int bar, double AB, double PSD) const;
+    bool has_PSDcuts();
 
     // MAP READERS
     bool ReadMap(std::string);

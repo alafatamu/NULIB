@@ -73,6 +73,7 @@ namespace treebiz{
     A(int, Cint_bot) \
     A(int, Tint_top) \
     A(int, Tint_bot) \
+    A(double, E_AB) \
     A(double, PSD_top) \
     A(double, PSD_bot) \
     A(double, PSD) \
