@@ -124,7 +124,7 @@ int detector::PIDtag(int bar, double xval, double PSD) const{
   if (!cut) return -1; //-1 output for filtering the multitude of no-cut bars
   if (PSD<0||PSD>1) return 0; //0 indicates NOT A NEUTRON
   if (cut->IsInside(xval, PSD)) return 1; //1 indicates a positive cut (neutron)
-  return -1;
+  return 0;
 }
 
 bool detector::has_PSDcuts(){
