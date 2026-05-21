@@ -307,11 +307,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
   TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
 
-  TH2F* PSDvE_AB = new TH2F("PSDvE_AB", "PSDvE_AB", 1000, 0, 10000, 100, 0, 1);
-  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 100, 0, 1);
-  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 1000, 0, 10000, 100, 0, 1);
-  TH2F* PSDtopC = new TH2F("PSDtopvC", "PSDtopvC", 1000, 0, 10000, 100, 0, 1);
-  TH2F* PSDbotC = new TH2F("PSDbotvC", "PSDbotvC", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDvQ_tot = new TH2F("PSDvQ_tot", "PSDvQ_tot", 1000, 0, 10000, 100, 0, 1);
 
   TH2F* PSDvT = new TH2F("PSDvT", "PSDvT", 1000, 0, 4000, 100, 0, 1);
 
@@ -334,11 +330,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
       PSDtop->Fill((*AData.r_PSD_top)[h]);
       PSDbot->Fill((*AData.r_PSD_bot)[h]);
 
-      PSDvE_AB->Fill((*AData.r_E_AB)[h],(*AData.r_PSD)[h]);
-      PSDvC->Fill(Cval,(*AData.r_PSD)[h]);
-      PSDvAB->Fill(ABval,(*AData.r_PSD)[h]);
-      PSDtopC->Fill(Cval,(*AData.r_PSD_top)[h]);
-      PSDbotC->Fill(Cval,(*AData.r_PSD_bot)[h]);
+      PSDvQ_tot->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD)[h]);
 
       double Tavg = ((double)(*AData.r_Tint_top)[h]+(double)(*AData.r_Tint_bot)[h])/2.;
       PSDvT->Fill(Tavg,(*AData.r_PSD)[h]);
@@ -352,11 +344,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   PSDtop->Write();
   PSDbot->Write();
 
-  PSDvE_AB->Write();
-  PSDvAB->Write();
-  PSDvC->Write();
-  PSDtopC->Write();
-  PSDbotC->Write();
+  PSDvQ_tot->Write();
 
   PSDvT->Write();
   
@@ -378,9 +366,10 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
 
   //Make the histograms before starting any loops
   TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
-  TH2F* PSDvC = new TH2F("PSDvC", "PSDvC", 1000, 0, 10000, 100, 0, 1);
-  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 100, 0, 1);
-  TH2F* PSDvE = new TH2F("PSDvE", "PSDvE", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 500, 0.5, 1);
+  TH2F* PSDvABtop = new TH2F("PSDvABtop", "PSDvABtop", 1000, 0, 10000, 500, 0.2, 0.7);
+  TH2F* PSDvABbot = new TH2F("PSDvABbot", "PSDvABbot", 1000, 0, 10000, 500, 0.2, 0.7);
+  TH2F* PSDvABalt = new TH2F("PSDvABalt", "PSDvABalt", 1000, 0, 10000, 500, 0.2, 0.7);
 
   //loop through all top-level objects in the data file
   TIter next(DataFile.GetListOfKeys());
@@ -416,20 +405,22 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
     AData.bindRead(*ATree); //bind the branches to the AData struct
 
     //loop through each event and fill the histograms
-    std::cout<<"Reading "<<ATree->GetEntries()<<" events from "<<in_dirname<<std::flush;
+    std::cout<<"Reading "<<ATree->GetEntries()<<" events from "<<in_dirname;
     int plottedhits = 0;
     for(int i=0; i<ATree->GetEntries(); i++){
+      //std::cout<<"                                                              \r";
+      //std::cout<<YELLOW<<"Reading... Currently at event " << i << RESET;std::flush(std::cout);
       ATree->GetEntry(i);
       for (int h=0;h<AData.coupledhits;h++){
 
         if((*AData.r_bar_id)[h]!=barreq && barreq!=1234) continue;
         plottedhits++;
         PSD->Fill((*AData.r_PSD)[h]);
-        double EfromC = (double)(*AData.r_Cint_top)[h]+(double)(*AData.r_Cint_bot)[h];
-        double EfromA = (double)(*AData.r_Aint_top)[h]+(double)(*AData.r_Aint_bot)[h];
-        PSDvC->Fill(EfromC,(*AData.r_PSD)[h]);
-        PSDvAB->Fill((*AData.r_E_AB)[h],(*AData.r_PSD)[h]);
-        PSDvE->Fill(EfromA,(*AData.r_PSD)[h]);
+        PSDvAB->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD)[h]);
+        PSDvABtop->Fill((*AData.r_Q_top)[h],(*AData.r_PSD_top)[h]);
+        PSDvABbot->Fill((*AData.r_Q_bot)[h],(*AData.r_PSD_bot)[h]);
+        PSDvABalt->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD_alt)[h]);
+
       }
     }
     std::cout<<" ---> "<<plottedhits<<" hits plotted."<<std::endl;
@@ -442,16 +433,18 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
   //now that everything has been looped through, let's write the histograms to the output directory
   B_Dir->cd();
   PSD->Write();
-  PSDvC->Write();
   PSDvAB->Write();
-  PSDvE->Write();
+  PSDvABtop->Write();
+  PSDvABbot->Write();
+  PSDvABalt->Write();
 
-  std::cout<<"Histograms saved ";
+  std::cout<<GREEN<<"Histograms saved ";
   if(barreq==1234){
     std::cout<<"for all bars."<<std::endl;
   }else{
     std::cout<<"for bar "<<barreq<<"."<<std::endl;
   }
+  std::cout<<RESET<<std::endl;
 
   return;
 }

@@ -75,13 +75,14 @@ namespace eventutils{
         int j_chip = outevent.chip[j];
         int j_chan = outevent.chan[j];
 
+        if(h_chip==j_chip&&h_chan==j_chan)continue; //skip if the hits are in the same chip and channel
         if(texneut.getbar(h_chip,h_chan)!=texneut.getbar(j_chip,j_chan))continue; //confirm they are in the same bar
         int barseen=texneut.getbar(h_chip,h_chan); //store bar number in a variable for later use
         if(barseen<0)continue; //skip if we have a bad bar
-        outevent.bar_id.push_back(barseen); //record the bar number in the event object
         
         used[h]=used[j]=true;//now we can do our full processing
         coupledhits++; //this hit is considered coupled now.
+        outevent.bar_id.push_back(barseen); //record the bar number -> bar_id should match coupledhits in length
 
         //figure out top/bottom pmt ID confirmation
         //h,j -> t,b
@@ -97,10 +98,10 @@ namespace eventutils{
         double topgain,botgain,Atop,Abot,Btop,Bbot;
         topgain = texneut.get_gainfactors(barseen,0);
         botgain = texneut.get_gainfactors(barseen,1);
-        Atop = (double)outevent.Aint[t]+texneut.get_offset(t_chip,t_chan,0);
-        Abot = (double)outevent.Aint[b]+texneut.get_offset(b_chip,b_chan,1);
-        Btop = (double)outevent.Bint[t]+texneut.get_offset(t_chip,t_chan,1);
-        Bbot = (double)outevent.Bint[b]+texneut.get_offset(b_chip,b_chan,0);
+        Atop = (double)outevent.Aint[t];//+texneut.get_offset(t_chip,t_chan,0);
+        Abot = (double)outevent.Aint[b];//+texneut.get_offset(b_chip,b_chan,1);
+        Btop = (double)outevent.Bint[t];//+texneut.get_offset(t_chip,t_chan,1);
+        Bbot = (double)outevent.Bint[b];//+texneut.get_offset(b_chip,b_chan,0);
 
         outevent.chip_top.push_back(t_chip);
         outevent.chan_top.push_back(t_chan);
@@ -195,23 +196,29 @@ namespace eventutils{
       double T_bot=(double)outevent.Tint_bot[h];
 
       //double EfromA = A_top+A_bot; //this is what dustin called totalE
-      double E_AB = A_top+A_bot+B_top+B_bot;
+      double Q_top = A_top+B_top;
+      double Q_bot = A_bot+B_bot;
+      //double Q_tot = A_top+A_bot+B_top+B_bot;
+      double Q_tot = sqrt(Q_top*Q_bot);
 
-      double PSDvaltop = 1-B_top/A_top;
-      double PSDvalbot = 1-B_bot/A_bot;
-      double PSDval = 1-(B_top+B_bot)/(A_top+A_bot);
-      //double PSDval = (B_top+B_bot)/Q;
+      double PSDvaltop = B_top/Q_top;
+      double PSDvalbot = B_bot/Q_bot;
+      double PSDalt = (B_top+B_bot)/(Q_top+Q_bot); // B/(B+A)
+      double PSDval = 0.5*(PSDvaltop+PSDvalbot);
 
       if(texneut.has_PSDcuts()){
         //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
-        outevent.PIDtag.push_back(texneut.PIDtag(outevent.bar_id[h],E_AB,PSDval)); 
+        outevent.PIDtag.push_back(texneut.PIDtag(outevent.bar_id[h],Q_tot,PSDval)); 
         //returns -1 if no cuts are availle for the requested bar
       }else{outevent.PIDtag.push_back(-1);}
 
-      outevent.E_AB.push_back(E_AB);
+      outevent.Q_tot.push_back(Q_tot);
+      outevent.Q_top.push_back(Q_top);
+      outevent.Q_bot.push_back(Q_bot);
       outevent.PSD_top.push_back(PSDvaltop);
       outevent.PSD_bot.push_back(PSDvalbot);
       outevent.PSD.push_back(PSDval);
+      outevent.PSD_alt.push_back(PSDalt);
       
       //stuff to work on later
       outevent.xhit.push_back(0.);

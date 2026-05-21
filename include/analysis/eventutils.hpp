@@ -60,8 +60,8 @@ namespace eventutils{
     std::vector<int> Cint_top, Cint_bot;
     std::vector<int> Tint_top, Tint_bot;
 
-    std::vector<double> E_AB;
-    std::vector<double> PSD, PSD_top, PSD_bot;
+    std::vector<double> Q_tot, Q_bot, Q_top;
+    std::vector<double> PSD, PSD_top, PSD_bot, PSD_alt;
     std::vector<double> xhit, yhit, zhit;
     std::vector<double> rho, theta, phi;
     std::vector<double> E_calc;

@@ -55,14 +55,17 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector& te
     std::flush(std::cout);
     raw_event rawevent = grab_event(InputEvtFile);
     if(rawevent.unpackflag==1){
+      RData.clear();
       RData.fillFrom(rawevent);
       RTree.Fill();
       processed_event processedevent = eventutils::process_event(rawevent, texneut);
       if(processedevent.keep){
         goodcount++;
+        PData.clear();
         PData.fillFrom(processedevent);
         PTree.Fill();
         analysed_event analysedevent = eventutils::analyse_event(processedevent, texneut);
+        AData.clear();
         AData.fillFrom(analysedevent);
         ATree.Fill();
       }else continue;
