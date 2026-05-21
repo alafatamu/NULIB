@@ -41,8 +41,8 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector& te
   treebiz::init_PTree(PTree, PData);
 
   TTree ATree("analysed", "Analysed event data");
-  treebiz::ATreeData AData;
-  treebiz::init_ATree(ATree, AData);
+  treebiz::AData AData;
+  AData.bindWrite(ATree);
 
   bool stillreading = true;
   int eventnumber = 0;
@@ -63,7 +63,7 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector& te
         treebiz::fill_PTreeData(PData, processedevent);
         PTree.Fill();
         analysed_event analysedevent = eventutils::analyse_event(processedevent, texneut);
-        treebiz::fill_ATreeData(AData, analysedevent);
+        AData.fillFrom(analysedevent);
         ATree.Fill();
       }else continue;
     }else if(rawevent.unpackflag==2||rawevent.unpackflag==3) stillreading = false;

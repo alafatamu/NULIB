@@ -296,8 +296,8 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   if(A_Dir==nullptr){std::cout<<RED<<"Error: could not make ANALYSED directory in HDump"<<RESET<<std::endl;return;}
 
   //Make the tree variables, then set the branch addresses
-  treebiz::ATreeReadData AData;
-  treebiz::set_ATreeBranches(*ATree, AData);
+  treebiz::AData AData;
+  AData.bindRead(*ATree);
 
   //Make the histograms
   TH1F* CmAB = new TH1F("CmAB", "CmAB", 3000, -3000, 3000);
@@ -320,29 +320,29 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
     bool plot = false;
     ATree->GetEntry(i);
     for (int h=0;h<AData.coupledhits;h++){
-      if((*AData.bar_id)[h]==barreq||barreq==1234) plot = true;
+      if((*AData.r_bar_id)[h]==barreq||barreq==1234) plot = true;
       if(!plot)continue;
 
-      int ABval = (*AData.Aint_top)[h]+(*AData.Aint_bot)[h]+(*AData.Bint_top)[h]+(*AData.Bint_bot)[h];
-      int BmAval = (*AData.Bint_top)[h]+(*AData.Bint_bot)[h]-(*AData.Aint_top)[h]-(*AData.Aint_bot)[h];
-      int Cval = (*AData.Cint_top)[h]+(*AData.Cint_bot)[h];
+      int ABval = (*AData.r_Aint_top)[h]+(*AData.r_Aint_bot)[h]+(*AData.r_Bint_top)[h]+(*AData.r_Bint_bot)[h];
+      int BmAval = (*AData.r_Bint_top)[h]+(*AData.r_Bint_bot)[h]-(*AData.r_Aint_top)[h]-(*AData.r_Aint_bot)[h];
+      int Cval = (*AData.r_Cint_top)[h]+(*AData.r_Cint_bot)[h];
       CmAB->Fill(Cval-ABval);
       BmA->Fill(BmAval);
 
 
-      PSD->Fill((*AData.PSD)[h]);
-      PSDtop->Fill((*AData.PSD_top)[h]);
-      PSDbot->Fill((*AData.PSD_bot)[h]);
+      PSD->Fill((*AData.r_PSD)[h]);
+      PSDtop->Fill((*AData.r_PSD_top)[h]);
+      PSDbot->Fill((*AData.r_PSD_bot)[h]);
 
-      double Ecalc = (double)(*AData.E_calc)[h];
-      PSDvEcalc->Fill(Ecalc,(*AData.PSD)[h]);
-      PSDvC->Fill(Cval,(*AData.PSD)[h]);
-      PSDvAB->Fill(ABval,(*AData.PSD)[h]);
-      PSDtopC->Fill(Cval,(*AData.PSD_top)[h]);
-      PSDbotC->Fill(Cval,(*AData.PSD_bot)[h]);
+      double Ecalc = (double)(*AData.r_E_calc)[h];
+      PSDvEcalc->Fill(Ecalc,(*AData.r_PSD)[h]);
+      PSDvC->Fill(Cval,(*AData.r_PSD)[h]);
+      PSDvAB->Fill(ABval,(*AData.r_PSD)[h]);
+      PSDtopC->Fill(Cval,(*AData.r_PSD_top)[h]);
+      PSDbotC->Fill(Cval,(*AData.r_PSD_bot)[h]);
 
-      double Tavg = ((double)(*AData.Tint_top)[h]+(double)(*AData.Tint_bot)[h])/2.;
-      PSDvT->Fill(Tavg,(*AData.PSD)[h]);
+      double Tavg = ((double)(*AData.r_Tint_top)[h]+(double)(*AData.r_Tint_bot)[h])/2.;
+      PSDvT->Fill(Tavg,(*AData.r_PSD)[h]);
     }
   }
 
@@ -413,8 +413,8 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
     }
 
     //prepare the branches and variables for reading the tree
-    treebiz::ATreeReadData AData;
-    treebiz::set_ATreeBranches(*ATree, AData);
+    treebiz::AData AData;
+    AData.bindRead(*ATree); //bind the branches to the AData struct
 
     //loop through each event and fill the histograms
     std::cout<<"Reading "<<ATree->GetEntries()<<" events from "<<in_dirname<<std::flush;
@@ -423,18 +423,18 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
       ATree->GetEntry(i);
       for (int h=0;h<AData.coupledhits;h++){
 
-        if((*AData.bar_id)[h]!=barreq && barreq!=1234) continue;
+        if((*AData.r_bar_id)[h]!=barreq && barreq!=1234) continue;
         plottedhits++;
-        PSD->Fill((*AData.PSD)[h]);
-        double EfromC = (double)(*AData.Cint_top)[h]+(double)(*AData.Cint_bot)[h];
-        double EfromAB = (double)(*AData.Aint_top)[h]+(double)(*AData.Aint_bot)[h]+(double)(*AData.Bint_top)[h]+(double)(*AData.Bint_bot)[h];
-        double EfromA = (double)(*AData.Aint_top)[h]+(double)(*AData.Aint_bot)[h];
-        double Qtop = (double)(*AData.Aint_top)[h]+(double)(*AData.Bint_top)[h];
-        double Qbot = (double)(*AData.Aint_bot)[h]+(double)(*AData.Bint_bot)[h];
+        PSD->Fill((*AData.r_PSD)[h]);
+        double EfromC = (double)(*AData.r_Cint_top)[h]+(double)(*AData.r_Cint_bot)[h];
+        double EfromAB = (double)(*AData.r_Aint_top)[h]+(double)(*AData.r_Aint_bot)[h]+(double)(*AData.r_Bint_top)[h]+(double)(*AData.r_Bint_bot)[h];
+        double EfromA = (double)(*AData.r_Aint_top)[h]+(double)(*AData.r_Aint_bot)[h];
+        double Qtop = (double)(*AData.r_Aint_top)[h]+(double)(*AData.r_Bint_top)[h];
+        double Qbot = (double)(*AData.r_Aint_bot)[h]+(double)(*AData.r_Bint_bot)[h];
         double Qcalc = 0.5*(Qtop+Qbot);
-        PSDvC->Fill(EfromC,(*AData.PSD)[h]);
-        PSDvAB->Fill(EfromAB,(*AData.PSD)[h]);
-        PSDvE->Fill(EfromA,(*AData.PSD)[h]);
+        PSDvC->Fill(EfromC,(*AData.r_PSD)[h]);
+        PSDvAB->Fill(EfromAB,(*AData.r_PSD)[h]);
+        PSDvE->Fill(EfromA,(*AData.r_PSD)[h]);
       }
     }
     std::cout<<" ---> "<<plottedhits<<" hits plotted."<<std::endl;
