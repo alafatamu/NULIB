@@ -6,6 +6,38 @@
 #include <vector>
 
 namespace treebiz{
+  //This is some cool shit. Here, we'll define branches for automatic variable generation and binding.
+  //If you want to add a new branch, such as an alternative PSD, just add PSD_alt to the list below and the rest is automated.
+  #define ADATA_SCALARS(X) \
+    X(long long int, timestamp, 0) \
+    X(int, coupledhits, 0)
+
+  #define ADATA_VECTORS(X) \
+    X(int, bar_id) \
+    X(int, chip_top) \
+    X(int, chip_bot) \
+    X(int, chan_top) \
+    X(int, chan_bot) \
+    X(int, Aint_top) \
+    X(int, Aint_bot) \
+    X(int, Bint_top) \
+    X(int, Bint_bot) \
+    X(int, Cint_top) \
+    X(int, Cint_bot) \
+    X(int, Tint_top) \
+    X(int, Tint_bot) \
+    X(double, PSD_top) \
+    X(double, PSD_bot) \
+    X(double, PSD) \
+    X(double, xhit) \
+    X(double, yhit) \
+    X(double, zhit) \
+    X(double, rho) \
+    X(double, theta) \
+    X(double, phi) \
+    X(double, E_calc) \
+    X(int, PIDtag)
+
   //TREE DATA WRITE STRUCTS
   struct RTreeData{ //raw data tree
     long long int timestamp = 0;
@@ -103,52 +135,20 @@ namespace treebiz{
   void set_PTreeBranches(TTree&, treebiz::PTreeReadData&);
 
   struct AData{
-    //Write Data members
-    long long int timestamp = 0;
-    int coupledhits = 0;
-    std::vector<int> bar_id;
-    std::vector<int> chip_top,chip_bot;
-    std::vector<int> chan_top,chan_bot;
-    std::vector<int> Aint_top,Aint_bot;
-    std::vector<int> Bint_top,Bint_bot;
-    std::vector<int> Cint_top,Cint_bot;
-    std::vector<int> Tint_top,Tint_bot;
+    //Continuation of the cool shit above. This is how we create the members defined above.
+    #define DECLARE_SCALAR(type, name, default_value) type name = default_value;
+      ADATA_SCALARS(DECLARE_SCALAR)
+    #undef DECLARE_SCALAR
 
-    std::vector<double> PSD_top, PSD_bot, PSD;
-    std::vector<double> xhit, yhit, zhit; //hit location 
-    std::vector<double> rho, theta, phi;
-    std::vector<double> E_calc; //Total energy (top+bottom PMT)
-    std::vector<int> PIDtag; //Particle ID tag - 1 for neutrons, 0 otherwise
+    #define DECLARE_VECTOR(type, name) std::vector<type> name;
+      ADATA_VECTORS(DECLARE_VECTOR)
+    #undef DECLARE_VECTOR
 
-    //Read Data members
-    long long int r_timestamp = 0;
-    int r_coupledhits = 0;
-    std::vector<int>* r_bar_id = nullptr;
-    std::vector<int>* r_chip_top = nullptr;
-    std::vector<int>* r_chip_bot = nullptr;
-    std::vector<int>* r_chan_top = nullptr;
-    std::vector<int>* r_chan_bot = nullptr;
-    std::vector<int>* r_Aint_top = nullptr; 
-    std::vector<int>* r_Aint_bot = nullptr;
-    std::vector<int>* r_Bint_top = nullptr;
-    std::vector<int>* r_Bint_bot = nullptr;
-    std::vector<int>* r_Cint_top = nullptr;
-    std::vector<int>* r_Cint_bot = nullptr;
-    std::vector<int>* r_Tint_top = nullptr;
-    std::vector<int>* r_Tint_bot = nullptr;
-
-    std::vector<double>* r_PSD_top = nullptr;
-    std::vector<double>* r_PSD_bot = nullptr;
-    std::vector<double>* r_PSD = nullptr;
-
-    std::vector<double>* r_xhit = nullptr;
-    std::vector<double>* r_yhit = nullptr;
-    std::vector<double>* r_zhit = nullptr;
-    std::vector<double>* r_rho = nullptr;
-    std::vector<double>* r_theta = nullptr;
-    std::vector<double>* r_phi = nullptr;
-    std::vector<double>* r_E_calc = nullptr;
-    std::vector<int>* r_PIDtag = nullptr;
+    //And this is how we create the pointer members
+    #define DECLARE_VECTOR_PTR(type, name) std::vector<type>* r_##name = &name;
+      ADATA_VECTORS(DECLARE_VECTOR_PTR)
+    #undef DECLARE_VECTOR_PTR
+    //note: we don't need scalar nullptrs because we can just pass their addresses to the tree
 
     //member functions
     void clear();

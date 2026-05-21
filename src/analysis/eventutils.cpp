@@ -207,8 +207,8 @@ namespace eventutils{
       //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
       outevent.PIDtag.push_back((int)(texneut.passes_PSDcut(outevent.bar_id[h],EfromAB,PSDval)));
 
-      outevent.PSDtop.push_back(PSDvaltop);
-      outevent.PSDbot.push_back(PSDvalbot);
+      outevent.PSD_top.push_back(PSDvaltop);
+      outevent.PSD_bot.push_back(PSDvalbot);
       outevent.PSD.push_back(PSDval);
       
       //stuff to work on later

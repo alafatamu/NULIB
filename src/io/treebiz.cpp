@@ -163,133 +163,52 @@ namespace treebiz{
   //ANALYSIS STUFF
 
   void AData::clear(){
-    timestamp = 0;
-    coupledhits = 0;
+    #define CLEAR_SCALAR(type, name, default_value) name = default_value;
+      ADATA_SCALARS(CLEAR_SCALAR)
+    #undef CLEAR_SCALAR
 
-    bar_id.clear();
+    #define CLEAR_VECTOR(type, name) name.clear();
+      ADATA_VECTORS(CLEAR_VECTOR)
+    #undef CLEAR_VECTOR
 
-    chip_top.clear(); chip_bot.clear();
-    chan_top.clear(); chan_bot.clear();
-
-    Aint_top.clear(); Aint_bot.clear();
-    Bint_top.clear(); Bint_bot.clear();
-    Cint_top.clear(); Cint_bot.clear();
-    Tint_top.clear(); Tint_bot.clear();
-
-    PSD_top.clear(); PSD_bot.clear();
-    PSD.clear();
-
-    xhit.clear(); yhit.clear(); zhit.clear();
-    rho.clear(); theta.clear(); phi.clear();
-
-    E_calc.clear();
-
-    PIDtag.clear();
     return;
   }
 
   void AData::bindWrite(TTree& tree){
-    tree.Branch("timestamp", &timestamp);
-    tree.Branch("coupledhits", &coupledhits);
-    tree.Branch("bar_id", &bar_id);
+    #define BIND_SCALAR(type, name, default_value) tree.Branch(#name, &name);
+      ADATA_SCALARS(BIND_SCALAR)
+    #undef BIND_SCALAR
 
-    tree.Branch("chip_top", &chip_top);
-    tree.Branch("chip_bot", &chip_bot);
-    tree.Branch("chan_top", &chan_top);
-    tree.Branch("chan_bot", &chan_bot);
+    #define BIND_VECTOR(type, name) tree.Branch(#name, &name);
+      ADATA_VECTORS(BIND_VECTOR)
+    #undef BIND_VECTOR
 
-    tree.Branch("Aint_top", &Aint_top);
-    tree.Branch("Aint_bot", &Aint_bot);
-    tree.Branch("Bint_top", &Bint_top);
-    tree.Branch("Bint_bot", &Bint_bot);
-    tree.Branch("Cint_top", &Cint_top);
-    tree.Branch("Cint_bot", &Cint_bot);
-    tree.Branch("Tint_top", &Tint_top);
-    tree.Branch("Tint_bot", &Tint_bot);
-
-    tree.Branch("PSD_top", &PSD_top);
-    tree.Branch("PSD_bot", &PSD_bot);
-    tree.Branch("PSD", &PSD);
-
-    tree.Branch("xhit", &xhit);
-    tree.Branch("yhit", &yhit);
-    tree.Branch("zhit", &zhit);
-    tree.Branch("rho", &rho);
-    tree.Branch("theta", &theta);
-    tree.Branch("phi", &phi);
-    tree.Branch("E_calc", &E_calc);
-
-    tree.Branch("PIDtag", &PIDtag);
     return;
   }
 
   void AData::bindRead(TTree& tree){
-    tree.SetBranchAddress("timestamp", &timestamp);
-    tree.SetBranchAddress("coupledhits", &coupledhits);
-    tree.SetBranchAddress("bar_id", &r_bar_id);
+    #define BIND_SCALAR(type, name, default_value) tree.SetBranchAddress(#name, &name);
+      ADATA_SCALARS(BIND_SCALAR)
+    #undef BIND_SCALAR
 
-    tree.SetBranchAddress("chip_top", &r_chip_top);
-    tree.SetBranchAddress("chip_bot", &r_chip_bot);
-    tree.SetBranchAddress("chan_top", &r_chan_top);
-    tree.SetBranchAddress("chan_bot", &r_chan_bot);
+    #define BIND_VECTOR(type, name) tree.SetBranchAddress(#name, &r_##name);
+      ADATA_VECTORS(BIND_VECTOR)
+    #undef BIND_VECTOR
 
-    tree.SetBranchAddress("Aint_top", &r_Aint_top);
-    tree.SetBranchAddress("Aint_bot", &r_Aint_bot);
-    tree.SetBranchAddress("Bint_top", &r_Bint_top);
-    tree.SetBranchAddress("Bint_bot", &r_Bint_bot);
-    tree.SetBranchAddress("Cint_top", &r_Cint_top);
-    tree.SetBranchAddress("Cint_bot", &r_Cint_bot);
-    tree.SetBranchAddress("Tint_top", &r_Tint_top);
-    tree.SetBranchAddress("Tint_bot", &r_Tint_bot);
-
-    tree.SetBranchAddress("PSD_top", &r_PSD_top);
-    tree.SetBranchAddress("PSD_bot", &r_PSD_bot);
-    tree.SetBranchAddress("PSD", &r_PSD);
-
-    tree.SetBranchAddress("xhit", &r_xhit);
-    tree.SetBranchAddress("yhit", &r_yhit);
-    tree.SetBranchAddress("zhit", &r_zhit);
-    tree.SetBranchAddress("rho", &r_rho);
-    tree.SetBranchAddress("theta", &r_theta);
-    tree.SetBranchAddress("phi", &r_phi);
-    tree.SetBranchAddress("E_calc", &r_E_calc);
-
-    tree.SetBranchAddress("PIDtag", &r_PIDtag);
     return;
   }
 
   void AData::fillFrom(const eventutils::analysed_event& event){
-    timestamp = event.timestamp;
-    coupledhits = event.coupledhits;
-    bar_id = event.bar_id;
+    //For this auto fill, the names in the event MUST match the names listed in treebiz.hpp
 
-    chip_top = event.chip_top;
-    chip_bot = event.chip_bot;
-    chan_top = event.chan_top;
-    chan_bot = event.chan_bot;
+    #define FILL_SCALAR(type, name, default_value) name = event.name;
+      ADATA_SCALARS(FILL_SCALAR)
+    #undef FILL_SCALAR
 
-    Aint_top = event.Aint_top;
-    Aint_bot = event.Aint_bot;
-    Bint_top = event.Bint_top;
-    Bint_bot = event.Bint_bot;
-    Cint_top = event.Cint_top;
-    Cint_bot = event.Cint_bot;
-    Tint_top = event.Tint_top;
-    Tint_bot = event.Tint_bot;
+    #define FILL_VECTOR(type, name) name = event.name;
+      ADATA_VECTORS(FILL_VECTOR)
+    #undef FILL_VECTOR
 
-    PSD_top = event.PSDtop;
-    PSD_bot = event.PSDbot;
-    PSD = event.PSD;
-
-    xhit = event.xhit;
-    yhit = event.yhit;
-    zhit = event.zhit;
-    rho = event.rho;
-    theta = event.theta;
-    phi = event.phi;
-    E_calc = event.E_calc;
-
-    PIDtag = event.PIDtag;
     return;
   }
 }
