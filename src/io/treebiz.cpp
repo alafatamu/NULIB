@@ -5,157 +5,106 @@
 #include <vector>
 
 namespace treebiz{
-  void init_RTree(TTree& tree, treebiz::RTreeData& RData){
-    tree.Branch("timestamp", &RData.timestamp);
-    tree.Branch("hitcount", &RData.hitcount);
-    tree.Branch("chip", &RData.chip);
-    tree.Branch("chan", &RData.chan);
-    tree.Branch("Aint", &RData.Aint);
-    tree.Branch("Bint", &RData.Bint);
-    tree.Branch("Cint", &RData.Cint);
-    tree.Branch("Tint", &RData.Tint);
-    tree.Branch("TDCchan", &RData.TDCchan);
-    tree.Branch("TDCval", &RData.TDCval);
+  //RAW STUFF 
+  void RData::clear(){
+    #define CLEAR_SCALAR(type, name, default_value) name = default_value;
+      RDATA_SCALARS(CLEAR_SCALAR)
+    #undef CLEAR_SCALAR
+
+    #define CLEAR_VECTOR(type, name) name.clear();
+      RDATA_VECTORS(CLEAR_VECTOR)
+    #undef CLEAR_VECTOR
+
     return;
   }
 
-  void init_PTree(TTree& tree, treebiz::PTreeData& PData){
-    tree.Branch("timestamp", &PData.timestamp);
-    tree.Branch("hitcount", &PData.hitcount);
-    tree.Branch("chip", &PData.chip);
-    tree.Branch("chan", &PData.chan);
-    tree.Branch("Aint", &PData.Aint);
-    tree.Branch("Bint", &PData.Bint);
-    tree.Branch("Cint", &PData.Cint);
-    tree.Branch("Tint", &PData.Tint);
-    tree.Branch("TDCchan", &PData.TDCchan);
-    tree.Branch("TDCval", &PData.TDCval);
+  void RData::bindWrite(TTree& tree){
+    #define BIND_SCALAR(type, name, default_value) tree.Branch(#name, &name);
+      RDATA_SCALARS(BIND_SCALAR)
+    #undef BIND_SCALAR
 
-    tree.Branch("chip_top", &PData.chip_top);
-    tree.Branch("chan_top", &PData.chan_top);
-    tree.Branch("Aint_top", &PData.Aint_top);
-    tree.Branch("Bint_top", &PData.Bint_top);
-    tree.Branch("Cint_top", &PData.Cint_top);
-    tree.Branch("Tint_top", &PData.Tint_top);
-    //tree.Branch("TDCchan_top", &PData.TDCchan_top);
-    //tree.Branch("TDCval_top", &PData.TDCval_top);
+    #define BIND_VECTOR(type, name) tree.Branch(#name, &name);
+      RDATA_VECTORS(BIND_VECTOR)
+    #undef BIND_VECTOR
 
-    tree.Branch("chip_bot", &PData.chip_bot);
-    tree.Branch("chan_bot", &PData.chan_bot);
-    tree.Branch("Aint_bot", &PData.Aint_bot);
-    tree.Branch("Bint_bot", &PData.Bint_bot);
-    tree.Branch("Cint_bot", &PData.Cint_bot);
-    tree.Branch("Tint_bot", &PData.Tint_bot);
-    //tree.Branch("TDCchan_bot", &PData.TDCchan_bot);
-    //tree.Branch("TDCval_bot", &PData.TDCval_bot);
-
-    tree.Branch("bar_id", &PData.bar_id);
-    tree.Branch("coupledhits", &PData.coupledhits);
-    tree.Branch("barmult", &PData.barmult);
     return;
   }
 
-  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-  //TREE FILLING
-  void fill_RTreeData(treebiz::RTreeData& RData, eventutils::raw_event& rawevent){
-    RData.timestamp = rawevent.timestamp;
-    RData.hitcount = rawevent.hitcount;
-    RData.chip = rawevent.chip;
-    RData.chan = rawevent.chan;
-    RData.Aint = rawevent.Aint;
-    RData.Bint = rawevent.Bint;
-    RData.Cint = rawevent.Cint;
-    RData.Tint = rawevent.Tint;
-    RData.TDCchan = rawevent.TDCchan;
-    RData.TDCval = rawevent.TDCval;
+  void RData::bindRead(TTree& tree){
+    #define BIND_SCALAR(type, name, default_value) tree.SetBranchAddress(#name, &name);
+      RDATA_SCALARS(BIND_SCALAR)
+    #undef BIND_SCALAR
+
+    #define BIND_VECTOR(type, name) tree.SetBranchAddress(#name, &r_##name);
+      RDATA_VECTORS(BIND_VECTOR)
+    #undef BIND_VECTOR
+
     return;
   }
 
-  void fill_PTreeData(treebiz::PTreeData& PData, eventutils::processed_event& processedevent){
-    PData.timestamp = processedevent.timestamp;
-    PData.hitcount = processedevent.hitcount;
-    PData.chip = processedevent.chip;
-    PData.chan = processedevent.chan;
-    PData.Aint = processedevent.Aint;
-    PData.Bint = processedevent.Bint;
-    PData.Cint = processedevent.Cint;
-    PData.Tint = processedevent.Tint;
-    PData.TDCchan = processedevent.TDCchan;
-    PData.TDCval = processedevent.TDCval;
+  void RData::fillFrom(const eventutils::raw_event& event){
+    //For this auto fill, the names in the event MUST match the names listed in treebiz.hpp
 
-    PData.chip_top = processedevent.chip_top;
-    PData.chan_top = processedevent.chan_top;
-    PData.Aint_top = processedevent.Aint_top;
-    PData.Bint_top = processedevent.Bint_top;
-    PData.Cint_top = processedevent.Cint_top;
-    PData.Tint_top = processedevent.Tint_top;
-    //PData.TDCchan_top = processedevent.TDCchan_top;
-    //PData.TDCval_top = processedevent.TDCval_top;
+    #define FILL_SCALAR(type, name, default_value) name = event.name;
+      RDATA_SCALARS(FILL_SCALAR)
+    #undef FILL_SCALAR
 
-    PData.chip_bot = processedevent.chip_bot;
-    PData.chan_bot = processedevent.chan_bot;
-    PData.Aint_bot = processedevent.Aint_bot;
-    PData.Bint_bot = processedevent.Bint_bot;
-    PData.Cint_bot = processedevent.Cint_bot;
-    PData.Tint_bot = processedevent.Tint_bot;
-    //PData.TDCchan_bot = processedevent.TDCchan_bot;
-    //PData.TDCval_bot = processedevent.TDCval_bot;
+    #define FILL_VECTOR(type, name) name = event.name;
+      RDATA_VECTORS(FILL_VECTOR)
+    #undef FILL_VECTOR
 
-    PData.bar_id = processedevent.bar_id;
-    PData.coupledhits = processedevent.coupledhits;
-    PData.barmult = processedevent.barmult;
     return;
   }
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-  //BRANCH SETTING
-  void set_RTreeBranches(TTree& tree, treebiz::RTreeReadData& RData){
-    tree.SetBranchAddress("timestamp", &RData.timestamp);
-    tree.SetBranchAddress("hitcount", &RData.hitcount);
-    tree.SetBranchAddress("chip", &RData.chip);
-    tree.SetBranchAddress("chan", &RData.chan);
-    tree.SetBranchAddress("Aint", &RData.Aint);
-    tree.SetBranchAddress("Bint", &RData.Bint);
-    tree.SetBranchAddress("Cint", &RData.Cint);
-    tree.SetBranchAddress("Tint", &RData.Tint);
-    tree.SetBranchAddress("TDCchan", &RData.TDCchan);
-    tree.SetBranchAddress("TDCval", &RData.TDCval);
+  //PROCESSED STUFF
+  void PData::clear(){
+    #define CLEAR_SCALAR(type, name, default_value) name = default_value;
+      PDATA_SCALARS(CLEAR_SCALAR)
+    #undef CLEAR_SCALAR
+
+    #define CLEAR_VECTOR(type, name) name.clear();
+      PDATA_VECTORS(CLEAR_VECTOR)
+    #undef CLEAR_VECTOR
+
     return;
   }
 
-  void set_PTreeBranches(TTree& tree, treebiz::PTreeReadData& PData){
-    tree.SetBranchAddress("timestamp", &PData.timestamp);
-    tree.SetBranchAddress("hitcount", &PData.hitcount);
-    tree.SetBranchAddress("chip", &PData.chip);
-    tree.SetBranchAddress("chan", &PData.chan);
-    tree.SetBranchAddress("Aint", &PData.Aint);
-    tree.SetBranchAddress("Bint", &PData.Bint);
-    tree.SetBranchAddress("Cint", &PData.Cint);
-    tree.SetBranchAddress("Tint", &PData.Tint);
-    tree.SetBranchAddress("TDCchan", &PData.TDCchan);
-    tree.SetBranchAddress("TDCval", &PData.TDCval);
+  void PData::bindWrite(TTree& tree){
+    #define BIND_SCALAR(type, name, default_value) tree.Branch(#name, &name);
+      PDATA_SCALARS(BIND_SCALAR)
+    #undef BIND_SCALAR
 
-    tree.SetBranchAddress("chip_top", &PData.chip_top);
-    tree.SetBranchAddress("chan_top", &PData.chan_top);
-    tree.SetBranchAddress("Aint_top", &PData.Aint_top);
-    tree.SetBranchAddress("Bint_top", &PData.Bint_top);
-    tree.SetBranchAddress("Cint_top", &PData.Cint_top);
-    tree.SetBranchAddress("Tint_top", &PData.Tint_top);
-    //tree.SetBranchAddress("TDCchan_top", &PData.TDCchan_top);
-    //tree.SetBranchAddress("TDCval_top", &PData.TDCval_top);
+    #define BIND_VECTOR(type, name) tree.Branch(#name, &name);
+      PDATA_VECTORS(BIND_VECTOR)
+    #undef BIND_VECTOR
 
-    tree.SetBranchAddress("chip_bot", &PData.chip_bot);
-    tree.SetBranchAddress("chan_bot", &PData.chan_bot);
-    tree.SetBranchAddress("Aint_bot", &PData.Aint_bot);
-    tree.SetBranchAddress("Bint_bot", &PData.Bint_bot);
-    tree.SetBranchAddress("Cint_bot", &PData.Cint_bot);
-    tree.SetBranchAddress("Tint_bot", &PData.Tint_bot);
-    //tree.SetBranchAddress("TDCchan_bot", &PData.TDCchan_bot);
-    //tree.SetBranchAddress("TDCval_bot", &PData.TDCval_bot);
+    return;
+  }
 
-    tree.SetBranchAddress("bar_id", &PData.bar_id);
-    tree.SetBranchAddress("coupledhits", &PData.coupledhits);
-    tree.SetBranchAddress("barmult", &PData.barmult);
+  void PData::bindRead(TTree& tree){
+    #define BIND_SCALAR(type, name, default_value) tree.SetBranchAddress(#name, &name);
+      PDATA_SCALARS(BIND_SCALAR)
+    #undef BIND_SCALAR
+
+    #define BIND_VECTOR(type, name) tree.SetBranchAddress(#name, &r_##name);
+      PDATA_VECTORS(BIND_VECTOR)
+    #undef BIND_VECTOR
+
+    return;
+  }
+
+  void PData::fillFrom(const eventutils::processed_event& event){
+    //For this auto fill, the names in the event MUST match the names listed in treebiz.hpp
+
+    #define FILL_SCALAR(type, name, default_value) name = event.name;
+      PDATA_SCALARS(FILL_SCALAR)
+    #undef FILL_SCALAR
+
+    #define FILL_VECTOR(type, name) name = event.name;
+      PDATA_VECTORS(FILL_VECTOR)
+    #undef FILL_VECTOR
+
     return;
   }
 

@@ -8,134 +8,128 @@
 namespace treebiz{
   //This is some cool shit. Here, we'll define branches for automatic variable generation and binding.
   //If you want to add a new branch, such as an alternative PSD, just add PSD_alt to the list below and the rest is automated.
-  #define ADATA_SCALARS(X) \
-    X(long long int, timestamp, 0) \
-    X(int, coupledhits, 0)
 
-  #define ADATA_VECTORS(X) \
-    X(int, bar_id) \
-    X(int, chip_top) \
-    X(int, chip_bot) \
-    X(int, chan_top) \
-    X(int, chan_bot) \
-    X(int, Aint_top) \
-    X(int, Aint_bot) \
-    X(int, Bint_top) \
-    X(int, Bint_bot) \
-    X(int, Cint_top) \
-    X(int, Cint_bot) \
-    X(int, Tint_top) \
-    X(int, Tint_bot) \
-    X(double, PSD_top) \
-    X(double, PSD_bot) \
-    X(double, PSD) \
-    X(double, xhit) \
-    X(double, yhit) \
-    X(double, zhit) \
-    X(double, rho) \
-    X(double, theta) \
-    X(double, phi) \
-    X(double, E_calc) \
-    X(int, PIDtag)
+  //Raw data defined here (read from evt files or manually entered)
+  #define RDATA_SCALARS(R) \
+    R(long long int, timestamp, 0) \
+    R(int, hitcount, 0) \
 
-  //TREE DATA WRITE STRUCTS
-  struct RTreeData{ //raw data tree
-    long long int timestamp = 0;
-    int hitcount = 0;
-    std::vector<int> chip;
-    std::vector<int> chan;
-    std::vector<int> Aint;
-    std::vector<int> Bint;
-    std::vector<int> Cint;
-    std::vector<int> Tint;
-    std::vector<int> TDCchan;
-    std::vector<int> TDCval;
-  }; 
+  #define RDATA_VECTORS(R) \
+    R(int, chip) \
+    R(int, chan) \
+    R(int, Aint) \
+    R(int, Bint) \
+    R(int, Cint) \
+    R(int, Tint) \
+    R(int, TDCchan) \
+    R(int, TDCval)
 
-  struct PTreeData{ //processed data tree
-    long long int timestamp = 0;
-    int hitcount = 0;
-    std::vector<int> chip;
-    std::vector<int> chan;
-    std::vector<int> Aint;
-    std::vector<int> Bint;
-    std::vector<int> Cint;
-    std::vector<int> Tint;
-    std::vector<int> TDCchan;
-    std::vector<int> TDCval;
+  //Processed data defined here (processed form the raw data previously stored)
+  #define PDATA_SCALARS(P) \
+    P(long long int, timestamp, 0) \
+    P(int, hitcount, 0) \
+    P(int, coupledhits, 0) \
+    P(int, barmult, 0) \
 
-    std::vector<int> chip_top,chip_bot;
-    std::vector<int> chan_top,chan_bot;
-    std::vector<int> Aint_top,Aint_bot;
-    std::vector<int> Bint_top,Bint_bot;
-    std::vector<int> Cint_top,Cint_bot;
-    std::vector<int> Tint_top,Tint_bot;
-    //std::vector<int> TDCchan_top,TDCchan_bot;
-    //std::vector<int> TDCval_top,TDCval_bot;
-    std::vector<int> bar_id;
-    int coupledhits = 0;
-    int barmult = 0;
-  };
+  #define PDATA_VECTORS(P) \
+    P(int, bar_id) \
+    P(int, chip) \
+    P(int, chan) \
+    P(int, Aint) \
+    P(int, Bint) \
+    P(int, Cint) \
+    P(int, Tint) \
+    P(int, TDCchan) \
+    P(int, TDCval) \
+    P(int, chip_top) \
+    P(int, chan_top) \
+    P(int, Aint_top) \
+    P(int, Bint_top) \
+    P(int, Cint_top) \
+    P(int, Tint_top) \
+    P(int, chip_bot) \
+    P(int, chan_bot) \
+    P(int, Aint_bot) \
+    P(int, Bint_bot) \
+    P(int, Cint_bot) \
+    P(int, Tint_bot) \
 
-  //TREE DATA READ STRUCTS
-  struct RTreeReadData{
-    long long int timestamp = 0;
-    int hitcount = 0;
-    std::vector<int>* chip = nullptr;
-    std::vector<int>* chan = nullptr;
-    std::vector<int>* Aint = nullptr;
-    std::vector<int>* Bint = nullptr;
-    std::vector<int>* Cint = nullptr;
-    std::vector<int>* Tint = nullptr;
-    std::vector<int>* TDCchan = nullptr;
-    std::vector<int>* TDCval = nullptr;
-  };
+  //Analysis data defined here (calculated from the processed data previously stored)
+  #define ADATA_SCALARS(A) \
+    A(long long int, timestamp, 0) \
+    A(int, coupledhits, 0)
 
-  struct PTreeReadData{
-    long long int timestamp = 0;
-    int hitcount = 0;
-    std::vector<int>* chip = nullptr;
-    std::vector<int>* chan = nullptr;
-    std::vector<int>* Aint = nullptr;
-    std::vector<int>* Bint = nullptr;
-    std::vector<int>* Cint = nullptr;
-    std::vector<int>* Tint = nullptr;
-    std::vector<int>* TDCchan = nullptr;
-    std::vector<int>* TDCval = nullptr;
+  #define ADATA_VECTORS(A) \
+    A(int, bar_id) \
+    A(int, chip_top) \
+    A(int, chip_bot) \
+    A(int, chan_top) \
+    A(int, chan_bot) \
+    A(int, Aint_top) \
+    A(int, Aint_bot) \
+    A(int, Bint_top) \
+    A(int, Bint_bot) \
+    A(int, Cint_top) \
+    A(int, Cint_bot) \
+    A(int, Tint_top) \
+    A(int, Tint_bot) \
+    A(double, PSD_top) \
+    A(double, PSD_bot) \
+    A(double, PSD) \
+    A(double, xhit) \
+    A(double, yhit) \
+    A(double, zhit) \
+    A(double, rho) \
+    A(double, theta) \
+    A(double, phi) \
+    A(double, E_calc) \
+    A(int, PIDtag)
 
-    std::vector<int>* chip_top = nullptr;
-    std::vector<int>* chip_bot = nullptr;
-    std::vector<int>* chan_top = nullptr;
-    std::vector<int>* chan_bot = nullptr;
-    std::vector<int>* Aint_top = nullptr;
-    std::vector<int>* Aint_bot = nullptr;
-    std::vector<int>* Bint_top = nullptr;
-    std::vector<int>* Bint_bot = nullptr;
-    std::vector<int>* Cint_top = nullptr;
-    std::vector<int>* Cint_bot = nullptr;
-    std::vector<int>* Tint_top = nullptr;
-    std::vector<int>* Tint_bot = nullptr;
-    //std::vector<int>* TDCchan_top = nullptr;
-    //std::vector<int>* TDCchan_bot = nullptr;
-    //std::vector<int>* TDCval_top = nullptr; 
-    //std::vector<int>* TDCval_bot = nullptr;
-
-    std::vector<int>* bar_id = nullptr;
-    int coupledhits = 0;
-    int barmult = 0;
-  };
   
-  void init_RTree(TTree&, treebiz::RTreeData&);
-  void init_PTree(TTree&, treebiz::PTreeData&);
+  struct RData{ //Raw data
+    //member variable generation
+    #define DECLARE_SCALAR(type, name, default_value) type name = default_value;
+      RDATA_SCALARS(DECLARE_SCALAR)
+    #undef DECLARE_SCALAR
 
-  void fill_RTreeData(treebiz::RTreeData&, eventutils::raw_event&);
-  void fill_PTreeData(treebiz::PTreeData&, eventutils::processed_event&);
+    #define DECLARE_VECTOR(type, name) std::vector<type> name;
+      RDATA_VECTORS(DECLARE_VECTOR)
+    #undef DECLARE_VECTOR
 
-  void set_RTreeBranches(TTree&, treebiz::RTreeReadData&);
-  void set_PTreeBranches(TTree&, treebiz::PTreeReadData&);
+    #define DECLARE_VECTOR_PTR(type, name) std::vector<type>* r_##name = &name;
+      RDATA_VECTORS(DECLARE_VECTOR_PTR)
+    #undef DECLARE_VECTOR_PTR
 
-  struct AData{
-    //Continuation of the cool shit above. This is how we create the members defined above.
+    //member functions
+    void clear();
+    void bindWrite(TTree& tree);
+    void bindRead(TTree& tree);
+    void fillFrom(const eventutils::raw_event& event);
+  };
+
+  struct PData{ //Processed data
+    //member variable generation
+    #define DECLARE_SCALAR(type, name, default_value) type name = default_value;
+      PDATA_SCALARS(DECLARE_SCALAR)
+    #undef DECLARE_SCALAR
+
+    #define DECLARE_VECTOR(type, name) std::vector<type> name;
+      PDATA_VECTORS(DECLARE_VECTOR)
+    #undef DECLARE_VECTOR
+
+    #define DECLARE_VECTOR_PTR(type, name) std::vector<type>* r_##name = &name;
+      PDATA_VECTORS(DECLARE_VECTOR_PTR)
+    #undef DECLARE_VECTOR_PTR
+    
+    //member functions
+    void clear();
+    void bindWrite(TTree& tree);
+    void bindRead(TTree& tree);
+    void fillFrom(const eventutils::processed_event& event);
+  };
+
+  struct AData{ //Analysis data
+    //member variable generation
     #define DECLARE_SCALAR(type, name, default_value) type name = default_value;
       ADATA_SCALARS(DECLARE_SCALAR)
     #undef DECLARE_SCALAR
@@ -144,11 +138,9 @@ namespace treebiz{
       ADATA_VECTORS(DECLARE_VECTOR)
     #undef DECLARE_VECTOR
 
-    //And this is how we create the pointer members
     #define DECLARE_VECTOR_PTR(type, name) std::vector<type>* r_##name = &name;
       ADATA_VECTORS(DECLARE_VECTOR_PTR)
     #undef DECLARE_VECTOR_PTR
-    //note: we don't need scalar nullptrs because we can just pass their addresses to the tree
 
     //member functions
     void clear();

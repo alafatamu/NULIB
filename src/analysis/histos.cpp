@@ -42,8 +42,8 @@ void base_histos(TFile& DataFile, TFile& HDump, int runreq){ //upgrade idea: tak
   if(R_Dir==nullptr){std::cout<<RED<<"Error: could not make raw directory in HDump"<<RESET<<std::endl;return;}
 
   //Make the tree variables, then set the branch addresses
-  treebiz::RTreeReadData RData;
-  treebiz::set_RTreeBranches(*RTree, RData);
+  treebiz::RData RData;
+  RData.bindRead(*RTree); //bind the branches to the RData struct
 
   //Make the histograms
   TH1F* hitcount_h = new TH1F("hitcount", "hitcount", 5, 0, 5);
@@ -61,16 +61,16 @@ void base_histos(TFile& DataFile, TFile& HDump, int runreq){ //upgrade idea: tak
     RTree->GetEntry(i);
     hitcount_h->Fill(RData.hitcount);
     for(int j=0; j<RData.hitcount; j++){
-      chip_h->Fill((*RData.chip)[j]);
-      chan_h->Fill((*RData.chan)[j]);
-      Aint_h->Fill((*RData.Aint)[j]);
-      Bint_h->Fill((*RData.Bint)[j]);
-      Cint_h->Fill((*RData.Cint)[j]);
-      Tint_h->Fill((*RData.Tint)[j]);
+      chip_h->Fill((*RData.r_chip)[j]);
+      chan_h->Fill((*RData.r_chan)[j]);
+      Aint_h->Fill((*RData.r_Aint)[j]);
+      Bint_h->Fill((*RData.r_Bint)[j]);
+      Cint_h->Fill((*RData.r_Cint)[j]);
+      Tint_h->Fill((*RData.r_Tint)[j]);
     }
-    for(int j=0; j<(*RData.TDCchan).size(); j++){
-      TDCchan_h->Fill((*RData.TDCchan)[j]);
-      TDCval_h->Fill((*RData.TDCval)[j]);
+    for(int j=0; j<(*RData.r_TDCchan).size(); j++){
+      TDCchan_h->Fill((*RData.r_TDCchan)[j]);
+      TDCval_h->Fill((*RData.r_TDCval)[j]);
     }
   }
 
@@ -126,8 +126,8 @@ void proc_histos(TFile& DataFile, TFile& HDump, int runreq){
   }
 
   //Make the tree variables, then set the branch addresses
-  treebiz::PTreeReadData PData;
-  treebiz::set_PTreeBranches(*PTree, PData);
+  treebiz::PData PData;
+  PData.bindRead(*PTree); //bind the branches to the PData struct
 
   //Make the histograms
   TH1F* hitcount_h = new TH1F("hitcount", "hitcount", 5, 0, 5);
@@ -173,40 +173,40 @@ void proc_histos(TFile& DataFile, TFile& HDump, int runreq){
     PTree->GetEntry(i);
     hitcount_h->Fill(PData.hitcount);
     for(int j=0; j<PData.hitcount; j++){
-      bar_id_h->Fill((*PData.bar_id)[j]);
-      chip_h->Fill((*PData.chip)[j]);
-      chan_h->Fill((*PData.chan)[j]);
-      Aint_h->Fill((*PData.Aint)[j]);
-      Bint_h->Fill((*PData.Bint)[j]);
-      Cint_h->Fill((*PData.Cint)[j]);
-      Tint_h->Fill((*PData.Tint)[j]);
+      bar_id_h->Fill((*PData.r_bar_id)[j]);
+      chip_h->Fill((*PData.r_chip)[j]);
+      chan_h->Fill((*PData.r_chan)[j]);
+      Aint_h->Fill((*PData.r_Aint)[j]);
+      Bint_h->Fill((*PData.r_Bint)[j]);
+      Cint_h->Fill((*PData.r_Cint)[j]);
+      Tint_h->Fill((*PData.r_Tint)[j]);
 
-      AvB_h->Fill((*PData.Aint)[j], (*PData.Bint)[j]);
+      AvB_h->Fill((*PData.r_Aint)[j], (*PData.r_Bint)[j]);
     }
 
     for(int j=0; j<PData.coupledhits; j++){
-      chip_top_h->Fill((*PData.chip_top)[j]);
-      chan_top_h->Fill((*PData.chan_top)[j]);
-      Aint_top_h->Fill((*PData.Aint_top)[j]);
-      Bint_top_h->Fill((*PData.Bint_top)[j]);
-      Cint_top_h->Fill((*PData.Cint_top)[j]);
-      Tint_top_h->Fill((*PData.Tint_top)[j]);
+      chip_top_h->Fill((*PData.r_chip_top)[j]);
+      chan_top_h->Fill((*PData.r_chan_top)[j]);
+      Aint_top_h->Fill((*PData.r_Aint_top)[j]);
+      Bint_top_h->Fill((*PData.r_Bint_top)[j]);
+      Cint_top_h->Fill((*PData.r_Cint_top)[j]);
+      Tint_top_h->Fill((*PData.r_Tint_top)[j]);
 
-      chip_bot_h->Fill((*PData.chip_bot)[j]);
-      chan_bot_h->Fill((*PData.chan_bot)[j]);
-      Aint_bot_h->Fill((*PData.Aint_bot)[j]);
-      Bint_bot_h->Fill((*PData.Bint_bot)[j]);
-      Cint_bot_h->Fill((*PData.Cint_bot)[j]);
-      Tint_bot_h->Fill((*PData.Tint_bot)[j]);
+      chip_bot_h->Fill((*PData.r_chip_bot)[j]);
+      chan_bot_h->Fill((*PData.r_chan_bot)[j]);
+      Aint_bot_h->Fill((*PData.r_Aint_bot)[j]);
+      Bint_bot_h->Fill((*PData.r_Bint_bot)[j]);
+      Cint_bot_h->Fill((*PData.r_Cint_bot)[j]);
+      Tint_bot_h->Fill((*PData.r_Tint_bot)[j]);
 
-      AvBtop_h->Fill((*PData.Aint_top)[j], (*PData.Bint_top)[j]);
-      AvBbot_h->Fill((*PData.Aint_bot)[j], (*PData.Bint_bot)[j]);
+      AvBtop_h->Fill((*PData.r_Aint_top)[j], (*PData.r_Bint_top)[j]);
+      AvBbot_h->Fill((*PData.r_Aint_bot)[j], (*PData.r_Bint_bot)[j]);
     }
     
     //std::cout<<"TDC data size: "<<(*PData.TDCchan).size()<<std::endl;
-    for(int j=0; j<(*PData.TDCchan).size(); j++){
-      TDCchan_h->Fill((*PData.TDCchan)[j]);
-      TDCval_h->Fill((*PData.TDCval)[j]);
+    for(int j=0; j<(*PData.r_TDCchan).size(); j++){
+      TDCchan_h->Fill((*PData.r_TDCchan)[j]);
+      TDCval_h->Fill((*PData.r_TDCval)[j]);
     }
     /*
     std::cout<<"TDC top chan size: "<<(*PData.TDCchan_top).size()<<std::endl;

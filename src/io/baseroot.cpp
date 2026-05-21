@@ -33,12 +33,12 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector& te
 
   //now all of these trees should be in the correct directory regardless of the runid
   TTree RTree("raw", "Raw event data");
-  treebiz::RTreeData RData;
-  treebiz::init_RTree(RTree, RData);
+  treebiz::RData RData;
+  RData.bindWrite(RTree);
 
   TTree PTree("processed", "Processed event data");
-  treebiz::PTreeData PData;
-  treebiz::init_PTree(PTree, PData);
+  treebiz::PData PData;
+  PData.bindWrite(PTree);
 
   TTree ATree("analysed", "Analysed event data");
   treebiz::AData AData;
@@ -55,12 +55,12 @@ int Evt_to_ROOT(std::ifstream& InputEvtFile, TFile& ROOTOutputFile, detector& te
     std::flush(std::cout);
     raw_event rawevent = grab_event(InputEvtFile);
     if(rawevent.unpackflag==1){
-      treebiz::fill_RTreeData(RData, rawevent);
+      RData.fillFrom(rawevent);
       RTree.Fill();
       processed_event processedevent = eventutils::process_event(rawevent, texneut);
       if(processedevent.keep){
         goodcount++;
-        treebiz::fill_PTreeData(PData, processedevent);
+        PData.fillFrom(processedevent);
         PTree.Fill();
         analysed_event analysedevent = eventutils::analyse_event(processedevent, texneut);
         AData.fillFrom(analysedevent);
