@@ -206,7 +206,8 @@ namespace eventutils{
 
       if(texneut.has_PSDcuts()){
         //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
-        outevent.PIDtag.push_back((int)(texneut.PIDtag(outevent.bar_id[h],E_AB,PSDval)));
+        outevent.PIDtag.push_back((int)(texneut.PIDtag(outevent.bar_id[h],E_AB,PSDval))); 
+        //returns -1 if no cuts are availle for the requested bar
       }else{outevent.PIDtag.push_back(0);}
 
       outevent.E_AB.push_back(E_AB);

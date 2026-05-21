@@ -121,9 +121,8 @@ int detector::PIDtag(int bar, double AB, double PSD) const{
   if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) return PIDtag;
   if (!std::isfinite(AB) || !std::isfinite(PSD)) return PIDtag;
   TCutG* cut = psd_cuts[bar];
-  if (!cut) return PIDtag; // Strict behavior: if no cut exists for this bar, reject the hit.
-
-  if (cut->IsInside(AB, PSD)) PIDtag = 1; //ONLY CHANGE PIDtag IF THE CUT PASSES
+  if (!cut) PIDtag = -1; //-1 output for filtering the multitude of no-cut bars
+  if (cut->IsInside(AB, PSD)) PIDtag = 1; //1 indicates a positive cut (neutron)
   return PIDtag;
 }
 
