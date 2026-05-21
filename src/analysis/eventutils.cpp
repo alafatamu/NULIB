@@ -102,8 +102,6 @@ namespace eventutils{
         Btop = (double)outevent.Bint[t]+texneut.get_offset(t_chip,t_chan,1);
         Bbot = (double)outevent.Bint[b]+texneut.get_offset(b_chip,b_chan,0);
 
-        outevent.bar_id.push_back(barseen);
-
         outevent.chip_top.push_back(t_chip);
         outevent.chan_top.push_back(t_chan);
         outevent.Aint_top.push_back(Atop);
@@ -206,9 +204,9 @@ namespace eventutils{
 
       if(texneut.has_PSDcuts()){
         //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
-        outevent.PIDtag.push_back((int)(texneut.PIDtag(outevent.bar_id[h],E_AB,PSDval))); 
+        outevent.PIDtag.push_back(texneut.PIDtag(outevent.bar_id[h],E_AB,PSDval)); 
         //returns -1 if no cuts are availle for the requested bar
-      }else{outevent.PIDtag.push_back(0);}
+      }else{outevent.PIDtag.push_back(-1);}
 
       outevent.E_AB.push_back(E_AB);
       outevent.PSD_top.push_back(PSDvaltop);

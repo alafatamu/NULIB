@@ -116,14 +116,15 @@ bool detector::has_PSDcut(int bar) const{
   return psd_cuts[bar] != nullptr;
 }
 
-int detector::PIDtag(int bar, double AB, double PSD) const{
-  int PIDtag = 0;
-  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) return PIDtag;
-  if (!std::isfinite(AB) || !std::isfinite(PSD)) return PIDtag;
+int detector::PIDtag(int bar, double xval, double PSD) const{
+  if (bar < 0 || bar >= static_cast<int>(psd_cuts.size())) return -1;
+  if (!std::isfinite(xval) || !std::isfinite(PSD)) return -1;
   TCutG* cut = psd_cuts[bar];
-  if (!cut) PIDtag = -1; //-1 output for filtering the multitude of no-cut bars
-  if (cut->IsInside(AB, PSD)) PIDtag = 1; //1 indicates a positive cut (neutron)
-  return PIDtag;
+
+  if (!cut) return -1; //-1 output for filtering the multitude of no-cut bars
+  if (PSD<0||PSD>1) return 0; //0 indicates NOT A NEUTRON
+  if (cut->IsInside(xval, PSD)) return 1; //1 indicates a positive cut (neutron)
+  return -1;
 }
 
 bool detector::has_PSDcuts(){
