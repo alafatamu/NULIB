@@ -159,7 +159,7 @@ void proc_histos(TFile& DataFile, TFile& HDump, int runreq){
   //TH1F* TDCchan_bot_h = new TH1F("TDCchan_bot", "TDCchan_bot", 16, 0, 16);
   //TH1F* TDCval_bot_h = new TH1F("TDCval_bot", "TDCval_bot", 2500, 0, 5000);
 
-  TH1F* barshit_h = new TH1F("barshit", "barshit", 128, 0, 128);
+  TH1F* bar_id_h = new TH1F("bar_id", "bar_id", 128, 0, 128);
   TH1F* coupledhits_h = new TH1F("coupledhits", "coupledhits", 5, 0, 5);
   TH1F* barmult_h = new TH1F("barmult", "barmult", 5, 0, 5);
 
@@ -173,7 +173,7 @@ void proc_histos(TFile& DataFile, TFile& HDump, int runreq){
     PTree->GetEntry(i);
     hitcount_h->Fill(PData.hitcount);
     for(int j=0; j<PData.hitcount; j++){
-      barshit_h->Fill((*PData.barshit)[j]);
+      bar_id_h->Fill((*PData.bar_id)[j]);
       chip_h->Fill((*PData.chip)[j]);
       chan_h->Fill((*PData.chan)[j]);
       Aint_h->Fill((*PData.Aint)[j]);
@@ -236,7 +236,7 @@ void proc_histos(TFile& DataFile, TFile& HDump, int runreq){
   Tint_h->Write();
   TDCchan_h->Write();
   TDCval_h->Write();
-  barshit_h->Write();
+  bar_id_h->Write();
   coupledhits_h->Write();
   barmult_h->Write();
 
@@ -320,7 +320,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
     bool plot = false;
     ATree->GetEntry(i);
     for (int h=0;h<AData.coupledhits;h++){
-      if((*AData.barshit)[h]==barreq||barreq==1234) plot = true;
+      if((*AData.bar_id)[h]==barreq||barreq==1234) plot = true;
       if(!plot)continue;
 
       int ABval = (*AData.Aint_top)[h]+(*AData.Aint_bot)[h]+(*AData.Bint_top)[h]+(*AData.Bint_bot)[h];
@@ -423,7 +423,7 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
       ATree->GetEntry(i);
       for (int h=0;h<AData.coupledhits;h++){
 
-        if((*AData.barshit)[h]!=barreq && barreq!=1234) continue;
+        if((*AData.bar_id)[h]!=barreq && barreq!=1234) continue;
         plottedhits++;
         PSD->Fill((*AData.PSD)[h]);
         double EfromC = (double)(*AData.Cint_top)[h]+(double)(*AData.Cint_bot)[h];

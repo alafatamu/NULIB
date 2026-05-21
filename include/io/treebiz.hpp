@@ -1,10 +1,34 @@
 #pragma once
 
-#include "io/treebiz.hpp"
 #include "analysis/eventutils.hpp"
 #include "TTree.h"
 
 #include <vector>
+
+struct AData{
+  //data for the tree
+  long long int timestamp = 0;
+  int coupledhits = 0;
+  std::vector<int> bar_id;
+  std::vector<int> chip_top,chip_bot;
+  std::vector<int> chan_top,chan_bot;
+  std::vector<int> Aint_top,Aint_bot;
+  std::vector<int> Bint_top,Bint_bot;
+  std::vector<int> Cint_top,Cint_bot;
+  std::vector<int> Tint_top,Tint_bot;
+
+  std::vector<double> PSD_top, PSD_bot, PSD;
+  std::vector<double> xhit, yhit, zhit; //hit location 
+  std::vector<double> rho, theta, phi;
+  std::vector<double> E_calc; //Total energy (top+bottom PMT)
+  std::vector<int> PIDtag; //Particle ID tag - 1 for neutrons, 0 otherwise
+
+  //member functions
+  void clear();
+  void bindWrite(TTree& tree);
+  void bindRead(TTree& tree);
+  void fillFrom(const eventutils::analysed_event& event);
+};
 
 namespace treebiz{
   //TREE DATA WRITE STRUCTS
@@ -41,7 +65,7 @@ namespace treebiz{
     std::vector<int> Tint_top,Tint_bot;
     //std::vector<int> TDCchan_top,TDCchan_bot;
     //std::vector<int> TDCval_top,TDCval_bot;
-    std::vector<int> barshit;
+    std::vector<int> bar_id;
     int coupledhits = 0;
     int barmult = 0;
   };
@@ -49,7 +73,7 @@ namespace treebiz{
   struct ATreeData{ //analysis data tree
     long long int timestamp = 0;
     int coupledhits = 0;
-    std::vector<int> barshit;
+    std::vector<int> bar_id;
     std::vector<int> nmaybe;
     std::vector<int> chip_top,chip_bot;
     std::vector<int> chan_top,chan_bot;
@@ -107,7 +131,7 @@ namespace treebiz{
     //std::vector<int>* TDCval_top = nullptr; 
     //std::vector<int>* TDCval_bot = nullptr;
 
-    std::vector<int>* barshit = nullptr;
+    std::vector<int>* bar_id = nullptr;
     int coupledhits = 0;
     int barmult = 0;
   };
@@ -115,7 +139,7 @@ namespace treebiz{
   struct ATreeReadData{
     long long int timestamp = 0;
     int coupledhits = 0;
-    std::vector<int>* barshit = nullptr;
+    std::vector<int>* bar_id = nullptr;
     std::vector<int>* nmaybe = nullptr;
     std::vector<int>* chip_top = nullptr;
     std::vector<int>* chip_bot = nullptr;

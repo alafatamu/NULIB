@@ -36,7 +36,7 @@ namespace eventutils{
     int coupledhits, barmult; 
     //coupledhits requires a multiplicity of 2.
     // barmult is the amount of DIFFERENT bars hit in the event.
-    std::vector<int> barshit; //a list of the bars hit in the event
+    std::vector<int> bar_id; //a list of the bars hit in the event
     std::vector<int> chip_top, chip_bot;
     std::vector<int> chan_top, chan_bot;
     std::vector<int> Aint_top, Aint_bot;
@@ -52,8 +52,7 @@ namespace eventutils{
   struct analysed_event{
     long long int timestamp;
     int coupledhits;
-    std::vector<int> barshit;
-    std::vector<int> nmaybe;
+    std::vector<int> bar_id;
     std::vector<int> chip_top, chip_bot;
     std::vector<int> chan_top, chan_bot;
     std::vector<int> Aint_top, Aint_bot;
@@ -65,6 +64,7 @@ namespace eventutils{
     std::vector<double> xhit, yhit, zhit;
     std::vector<double> rho, theta, phi;
     std::vector<double> E_calc;
+    std::vector<int> PIDtag;
   };
 
   //Functions for handling the event data (and structs)

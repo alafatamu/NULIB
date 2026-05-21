@@ -78,7 +78,7 @@ namespace eventutils{
         if(texneut.getbar(h_chip,h_chan)!=texneut.getbar(j_chip,j_chan))continue; //confirm they are in the same bar
         int barseen=texneut.getbar(h_chip,h_chan); //store bar number in a variable for later use
         if(barseen<0)continue; //skip if we have a bad bar
-        outevent.barshit.push_back(barseen); //record the bar number in the event object
+        outevent.bar_id.push_back(barseen); //record the bar number in the event object
         
         used[h]=used[j]=true;//now we can do our full processing
         coupledhits++; //this hit is considered coupled now.
@@ -102,7 +102,7 @@ namespace eventutils{
         Btop = (double)outevent.Bint[t]+texneut.get_offset(t_chip,t_chan,1);
         Bbot = (double)outevent.Bint[b]+texneut.get_offset(b_chip,b_chan,0);
 
-        outevent.barshit.push_back(barseen);
+        outevent.bar_id.push_back(barseen);
 
         outevent.chip_top.push_back(t_chip);
         outevent.chan_top.push_back(t_chan);
@@ -138,7 +138,7 @@ namespace eventutils{
     }
     if(coupledhits==0) return outevent; //NOTICE NO KEEP=TRUE HERE
     //find bar multiplicity
-    std::unordered_set<int> multfinder(outevent.barshit.begin(),outevent.barshit.end());
+    std::unordered_set<int> multfinder(outevent.bar_id.begin(),outevent.bar_id.end());
     outevent.barmult=multfinder.size();
     if(outevent.barmult==0) return outevent; //NOTICE NO KEEP=TRUE HERE
 
@@ -170,7 +170,7 @@ namespace eventutils{
     //copy over the essentials
     outevent.timestamp = inevent.timestamp;
     outevent.coupledhits = inevent.coupledhits;
-    outevent.barshit = std::move(inevent.barshit);
+    outevent.bar_id = std::move(inevent.bar_id);
     outevent.chip_top = std::move(inevent.chip_top);
     outevent.chip_bot = std::move(inevent.chip_bot);
     outevent.chan_top = std::move(inevent.chan_top);
@@ -205,7 +205,7 @@ namespace eventutils{
       //double PSDval = (B_top+B_bot)/Q;
 
       //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
-      outevent.nmaybe.push_back((int)(texneut.passes_PSDcut(outevent.barshit[h],EfromAB,PSDval)));
+      outevent.PIDtag.push_back((int)(texneut.passes_PSDcut(outevent.bar_id[h],EfromAB,PSDval)));
 
       outevent.PSDtop.push_back(PSDvaltop);
       outevent.PSDbot.push_back(PSDvalbot);
