@@ -38,10 +38,10 @@ TCutG* find_latest_cut()
     return nullptr;
 }
 
-void make_PSDvAB_cuts(
+void make_PSD_cuts(
     const char* histfile_name = "6hepn_histos.root",
-    const char* cutfile_name  = "PSDvAB_cuts.root",
-    const char* hist_name     = "PSDvAB"
+    const char* cutfile_name  = "PSD_cuts.root",
+    const char* hist_name     = "PSD"
 )
 {
     TFile* histfile = TFile::Open(histfile_name, "READ");
@@ -61,7 +61,8 @@ void make_PSDvAB_cuts(
         return;
     }
 
-    TCanvas* c = new TCanvas("c_make_PSDvAB_cuts", "Draw PSDvAB Cuts", 1000, 800);
+    TCanvas* c = new TCanvas("c_make_PSD_cuts", "Draw PSD Cuts", 1000, 800);
+    c->SetLogz(1);
 
     TIter nextkey(histfile->GetListOfKeys());
     TKey* key = nullptr;
@@ -86,10 +87,10 @@ void make_PSDvAB_cuts(
 
         std::string dirname = bardir->GetName();
 
-        TH2* hPSDvAB = nullptr;
-        bardir->GetObject(hist_name, hPSDvAB);
+        TH2* hPSD = nullptr;
+        bardir->GetObject(hist_name, hPSD);
 
-        if (!hPSDvAB) {
+        if (!hPSD) {
             std::cout << "Skipping directory " << dirname
                       << " because histogram " << hist_name
                       << " was not found.\n";
@@ -100,14 +101,14 @@ void make_PSDvAB_cuts(
         c->cd();
         c->Clear();
 
-        hPSDvAB->SetTitle(Form("%s/%s", dirname.c_str(), hist_name));
-        hPSDvAB->Draw("COLZ");
+        hPSD->SetTitle(Form("%s/%s", dirname.c_str(), hist_name));
+        hPSD->Draw("COLZ");
         c->Update();
 
         std::cout << "\n====================================================\n";
         std::cout << "Directory: " << dirname << "\n";
         std::cout << "Histogram: " << hist_name << "\n";
-        std::cout << "Draw a graphical cut around the accepted PSDvAB region.\n";
+        std::cout << "Draw a graphical cut around the accepted PSD region.\n";
         std::cout << "\n";
         std::cout << "Typical ROOT interaction:\n";
         std::cout << "  - Click the canvas.\n";
@@ -134,9 +135,9 @@ void make_PSDvAB_cuts(
             continue;
         }
 
-        std::string cutname = dirname + "_PSDvAB_cut";
+        std::string cutname = dirname + "_PSD_cut";
         cut->SetName(cutname.c_str());
-        cut->SetTitle(Form("PSDvAB cut for %s", dirname.c_str()));
+        cut->SetTitle(Form("PSD cut for %s", dirname.c_str()));
 
         cutfile->cd();
         cut->Write(cutname.c_str(), TObject::kOverwrite);
@@ -165,5 +166,5 @@ void make_PSDvAB_cuts(
 
 //root -l
 //.L cutter.C
-//make_PSDvAB_cuts("6hepn_histos.root", "PSDvAB_cuts.root", "PSDvAB")
+//make_PSD_cuts("6hepn_histos.root", "PSD_cuts.root", "PSD")
 
