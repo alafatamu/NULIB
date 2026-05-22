@@ -313,11 +313,9 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
 
   //loop through each event and fill the histograms
   for(int i=0; i<ATree->GetEntries(); i++){
-    bool plot = false;
     ATree->GetEntry(i);
     for (int h=0;h<AData.coupledhits;h++){
-      if((*AData.r_bar_id)[h]==barreq||barreq==1234) plot = true;
-      if(!plot)continue;
+      if((*AData.r_bar_id)[h]!=barreq && barreq!=1234) continue;
 
       int ABval = (*AData.r_Aint_top)[h]+(*AData.r_Aint_bot)[h]+(*AData.r_Bint_top)[h]+(*AData.r_Bint_bot)[h];
       int BmAval = (*AData.r_Bint_top)[h]+(*AData.r_Bint_bot)[h]-(*AData.r_Aint_top)[h]-(*AData.r_Aint_bot)[h];
@@ -366,7 +364,7 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
 
   //Make the histograms before starting any loops
   TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
-  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 500, 0.5, 1);
+  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 500, 0.2, 0.7);
   TH2F* PSDvABtop = new TH2F("PSDvABtop", "PSDvABtop", 1000, 0, 10000, 500, 0.2, 0.7);
   TH2F* PSDvABbot = new TH2F("PSDvABbot", "PSDvABbot", 1000, 0, 10000, 500, 0.2, 0.7);
   TH2F* PSDvABalt = new TH2F("PSDvABalt", "PSDvABalt", 1000, 0, 10000, 500, 0.2, 0.7);

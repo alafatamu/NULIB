@@ -37,7 +37,7 @@ class detector{
     bool psd_cuts_loaded = false;
 
   public:
-    detector() = default;
+    detector();
     ~detector();
 
     // Disable copying because this class owns TCutG pointers.

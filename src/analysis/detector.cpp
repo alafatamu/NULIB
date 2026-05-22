@@ -24,9 +24,35 @@ detector::~detector(){
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// INIT
+detector::detector(){ //initialize the maps with invalid values
+  for (int i = 0; i < 32; i++) {
+    for (int j = 0; j < 8; j++) {
+      map_x[i][j] = -1;
+      map_y[i][j] = -1;
+      map_bar[i][j] = -1;
+      map_chan[i][j] = -1;
+      map_tdcchan[i][j] = -1;
+      map_Aoffset[i][j] = -1;
+      map_Boffset[i][j] = -1;
+    }
+  }
+
+  for (int i = 0; i < 128; i++) {
+    map_toppmts[i] = -1;
+    map_bottompmts[i] = -1;
+    map_gainfactors[i][0] = 1.0;
+    map_gainfactors[i][1] = 1.0;
+  }
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 // GETTER FUNCTIONS
 
-int detector::getbar(int chip, int chan){return map_bar[chip][chan];}
+int detector::getbar(int chip, int chan){
+  if (chip < 0 || chip >= 32 || chan < 0 || chan >= 8) return -1;
+  return map_bar[chip][chan];
+}
 int detector::get_pmt_id(int chip, int chan){return map_chan[chip][chan];}
 
 double detector::get_gainfactors(int bar, int spot){return map_gainfactors[bar][spot];} // spot is top (0) or bottom (1)
