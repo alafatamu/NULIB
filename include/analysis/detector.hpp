@@ -51,7 +51,8 @@ class detector{
     // GETTER FUNCTIONS
     int getbar(int, int);
     int get_pmt_id(int, int);
-    double get_coord(int, int, int);
+    double get_xcoord(int, int);
+    double get_ycoord(int, int);
     double get_offset(int, int, int);
     double get_gainfactors(int, int);
     int get_tdcchan(int, int);

@@ -63,12 +63,9 @@ int detector::get_top_pmt_id(int bar){return map_toppmts[bar];}
 
 int detector::get_bottom_pmt_id(int bar){return map_bottompmts[bar];}
 
-double detector::get_coord(int chip, int chan, int coordreq){
-  // 0 is x, 1 is y
-  if (coordreq == 0) return static_cast<double>(map_x[chip][chan]);
-  if (coordreq == 1) return static_cast<double>(map_y[chip][chan]);
-  return 0.0; // TODO: default behavior here should maybe be NAN or throw an error
-}
+double detector::get_xcoord(int chip, int chan){return static_cast<double>(map_x[chip][chan]);}
+
+double detector::get_ycoord(int chip, int chan){return static_cast<double>(map_y[chip][chan]);}
 
 double detector::get_offset(int chip, int chan, int osreq){
   // osreq = offset request, 0 is A and 1 is B

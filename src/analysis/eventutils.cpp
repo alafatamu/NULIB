@@ -199,15 +199,17 @@ namespace eventutils{
       double Q_top = A_top+B_top;
       double Q_bot = A_bot+B_bot;
       //double Q_tot = A_top+A_bot+B_top+B_bot;
-      double Q_tot = sqrt(Q_top*Q_bot);
+      double Q_tot = Q_top+Q_bot;
+      double topWeight = Q_top/(Q_top+Q_bot);
+      double botWeight = Q_bot/(Q_top+Q_bot);
 
       double PSDvaltop = B_top/Q_top;
       double PSDvalbot = B_bot/Q_bot;
-      double PSDalt = (B_top+B_bot)/(Q_top+Q_bot); // B/(B+A)
-      double PSDval = 0.5*(PSDvaltop+PSDvalbot);
+      double PSDalt = (B_top+B_bot)/Q_tot; // B/(B+A)
+      double PSDval = topWeight*PSDvaltop + botWeight*PSDvalbot;
 
       if(texneut.has_PSDcuts()){
-        //if the values are in the PSDvAB cuts, let's flag the hit as good, otherwise bad
+        //if the values are in the PSD cuts, let's flag the hit as good, otherwise bad
         outevent.PIDtag.push_back(texneut.PIDtag(outevent.bar_id[h],Q_tot,PSDval)); 
         //returns -1 if no cuts are availle for the requested bar
       }else{outevent.PIDtag.push_back(-1);}
@@ -221,9 +223,13 @@ namespace eventutils{
       outevent.PSD_alt.push_back(PSDalt);
       
       //stuff to work on later
-      outevent.xhit.push_back(0.);
-      outevent.yhit.push_back(0.);
-      outevent.zhit.push_back(0.);
+      double xhit=texneut.get_xcoord(outevent.chip_top[h],outevent.chan_top[h]);
+      double yhit=texneut.get_ycoord(outevent.chip_top[h],outevent.chan_top[h]);
+      double zhit=log(A_top/A_bot);
+      outevent.xhit.push_back(xhit);
+      outevent.yhit.push_back(yhit);
+      outevent.zhit.push_back(zhit);
+
       outevent.rho.push_back(0.);
       outevent.theta.push_back(0.);
       outevent.phi.push_back(0.);

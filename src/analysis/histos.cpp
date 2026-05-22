@@ -10,6 +10,7 @@
 #include "TString.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TH3F.h"
 #include "TKey.h"
 
 using namespace tformat;
@@ -291,7 +292,7 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
 
   //Finally, let's make the new directory in HDump
   TDirectory* A_Dir = outputbase->GetDirectory("ANALYSED"); //check for the directory
-  if(A_Dir) HDump.rmdir("ANALYSED"); //delete the directory (and its contents) if it already exists
+  if(A_Dir) outputbase->rmdir("ANALYSED"); //delete the directory (and its contents) if it already exists
   A_Dir = outputbase->mkdir("ANALYSED"); //make the new directory
   if(A_Dir==nullptr){std::cout<<RED<<"Error: could not make ANALYSED directory in HDump"<<RESET<<std::endl;return;}
 
@@ -303,13 +304,17 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   TH1F* CmAB = new TH1F("CmAB", "CmAB", 3000, -3000, 3000);
   TH1F* BmA = new TH1F("BmA", "BmA", 3000, -3000, 3000);
 
-  TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
-  TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 400, -2, 2);
-  TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 400, -2, 2);
+  TH1F* PSD = new TH1F("PSD", "PSD", 500, 0.2, 0.7);
+  TH1F* PSDtop = new TH1F("PSDtop", "PSDtop", 500, 0.2, 0.7);
+  TH1F* PSDbot = new TH1F("PSDbot", "PSDbot", 500, 0.2, 0.7);
 
-  TH2F* PSDvQ_tot = new TH2F("PSDvQ_tot", "PSDvQ_tot", 1000, 0, 10000, 100, 0, 1);
+  TH2F* PSDvQ = new TH2F("PSDvQ", "PSDvQ", 1100, 0, 11000, 500, 0.2, 0.7);
+  TH2F* PSDvQtop = new TH2F("PSDvQtop", "PSDvQtop", 1100, 0, 11000, 500, 0.2, 0.7);
+  TH2F* PSDvQbot = new TH2F("PSDvQbot", "PSDvQbot", 1100, 0, 11000, 500, 0.2, 0.7);
 
-  TH2F* PSDvT = new TH2F("PSDvT", "PSDvT", 1000, 0, 4000, 100, 0, 1);
+  TH2F* PSDvT = new TH2F("PSDvT", "PSDvT", 1000, 0, 4000, 500, 0.2, 0.7);
+
+  TH3F* THREED = new TH3F("THREED", "THREED", 19, -1, 18, 9, -1, 8, 6, -2, 2);
 
   //loop through each event and fill the histograms
   for(int i=0; i<ATree->GetEntries(); i++){
@@ -328,7 +333,11 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
       PSDtop->Fill((*AData.r_PSD_top)[h]);
       PSDbot->Fill((*AData.r_PSD_bot)[h]);
 
-      PSDvQ_tot->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD)[h]);
+      PSDvQ->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD)[h]);
+      PSDvQtop->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD_top)[h]);
+      PSDvQbot->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD_bot)[h]);
+
+      THREED->Fill((*AData.r_xhit)[h],(*AData.r_yhit)[h],(*AData.r_zhit)[h]);
 
       double Tavg = ((double)(*AData.r_Tint_top)[h]+(double)(*AData.r_Tint_bot)[h])/2.;
       PSDvT->Fill(Tavg,(*AData.r_PSD)[h]);
@@ -342,9 +351,13 @@ void calc_histos(TFile& DataFile, TFile& HDump, int runreq, int barreq){
   PSDtop->Write();
   PSDbot->Write();
 
-  PSDvQ_tot->Write();
+  PSDvQ->Write();
+  PSDvQtop->Write();
+  PSDvQbot->Write();
 
   PSDvT->Write();
+
+  THREED->Write();
   
   std::cout<<"Analysed histograms saved..."<<std::endl;
   return;
@@ -364,10 +377,11 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
 
   //Make the histograms before starting any loops
   TH1F* PSD = new TH1F("PSD", "PSD", 400, -2, 2);
-  TH2F* PSDvAB = new TH2F("PSDvAB", "PSDvAB", 1000, 0, 10000, 500, 0.2, 0.7);
-  TH2F* PSDvABtop = new TH2F("PSDvABtop", "PSDvABtop", 1000, 0, 10000, 500, 0.2, 0.7);
-  TH2F* PSDvABbot = new TH2F("PSDvABbot", "PSDvABbot", 1000, 0, 10000, 500, 0.2, 0.7);
-  TH2F* PSDvABalt = new TH2F("PSDvABalt", "PSDvABalt", 1000, 0, 10000, 500, 0.2, 0.7);
+  TH2F* PSDvQ = new TH2F("PSDvQ", "PSDvQ", 1100, 0, 11000, 500, 0.2, 0.7);
+  TH2F* PSDvQtop = new TH2F("PSDvQtop", "PSDvQtop", 1100, 0, 11000, 500, 0.2, 0.7);
+  TH2F* PSDvQbot = new TH2F("PSDvQbot", "PSDvQbot", 1100, 0, 11000, 500, 0.2, 0.7);
+  TH2F* PSDvQalt = new TH2F("PSDvQalt", "PSDvQalt", 1100, 0, 11000, 500, 0.2, 0.7);
+  TH3F* THREED = new TH3F("THREED", "THREED", 19, -1, 18, 9, -1, 8, 6, -2, 2);
 
   //loop through all top-level objects in the data file
   TIter next(DataFile.GetListOfKeys());
@@ -414,10 +428,12 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
         if((*AData.r_bar_id)[h]!=barreq && barreq!=1234) continue;
         plottedhits++;
         PSD->Fill((*AData.r_PSD)[h]);
-        PSDvAB->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD)[h]);
-        PSDvABtop->Fill((*AData.r_Q_top)[h],(*AData.r_PSD_top)[h]);
-        PSDvABbot->Fill((*AData.r_Q_bot)[h],(*AData.r_PSD_bot)[h]);
-        PSDvABalt->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD_alt)[h]);
+        PSDvQ->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD)[h]);
+        PSDvQtop->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD_top)[h]);
+        PSDvQbot->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD_bot)[h]);
+        PSDvQalt->Fill((*AData.r_Q_tot)[h],(*AData.r_PSD_alt)[h]);
+
+        THREED->Fill((*AData.r_xhit)[h],(*AData.r_yhit)[h],(*AData.r_zhit)[h]);
 
       }
     }
@@ -431,10 +447,11 @@ void set_histos(TFile& DataFile, TFile& HDump, int barreq){
   //now that everything has been looped through, let's write the histograms to the output directory
   B_Dir->cd();
   PSD->Write();
-  PSDvAB->Write();
-  PSDvABtop->Write();
-  PSDvABbot->Write();
-  PSDvABalt->Write();
+  PSDvQ->Write();
+  PSDvQtop->Write();
+  PSDvQbot->Write();
+  PSDvQalt->Write();
+  THREED->Write();
 
   std::cout<<GREEN<<"Histograms saved ";
   if(barreq==1234){
