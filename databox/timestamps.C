@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-void write_pid_timestamps(int runnum) {
+void ts(int runnum) {
     TString input_filename = Form("run%d.root",runnum);
     TString output_filename = Form("run%d_times.txt",runnum);
     TFile* f = TFile::Open(input_filename, "READ");
