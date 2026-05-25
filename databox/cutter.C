@@ -41,7 +41,7 @@ TCutG* find_latest_cut()
 void make_PSD_cuts(
     const char* histfile_name = "6hepn_histos.root",
     const char* cutfile_name  = "PSD_cuts.root",
-    const char* hist_name     = "PSD"
+    const char* hist_name     = "PSDvQ"
 )
 {
     TFile* histfile = TFile::Open(histfile_name, "READ");
